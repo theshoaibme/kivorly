@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 // MARK: - Premium Color Palette
 public enum KivorlyColors {

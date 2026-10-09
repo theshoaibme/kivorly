@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 public enum ServiceType: String, CaseIterable, Identifiable, Codable {
     case rideSharing = "ride_sharing"

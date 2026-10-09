@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="web/public/app-icon.png" width="88" alt="Kivorly Logo" style="border-radius: 20px;"/>
+<img src="web/public/app-icon.png" width="96" alt="Kivorly Logo"/>
 
 # Kivorly 🇧🇩
 ### The Everything Super App for Bangladesh
@@ -28,13 +28,11 @@
 | :---: | :---: | :---: | :---: |
 | <img src="docs/screenshots/01_home_dashboard.png" width="220" alt="Home"/> | <img src="docs/screenshots/04_activity_live.png" width="220" alt="Activity"/> | <img src="docs/screenshots/06_service_ride_sharing.png" width="220" alt="Rides"/> | <img src="docs/screenshots/12_service_food_delivery.png" width="220" alt="Food"/> |
 
-</div>
-
-<details>
-<summary><b>📸 View More Service Screenshots (Click to expand)</b></summary>
 <br>
 
-<div align="center">
+<details>
+<summary align="center"><h4>📸 View More Service Screenshots (Click to expand)</h4></summary>
+<br>
 
 | Explore Directory | Inter-City Tickets | Express Courier | Brand Shopping |
 | :---: | :---: | :---: | :---: |
@@ -44,9 +42,9 @@
 | :---: | :---: | :---: | :---: |
 | <img src="docs/screenshots/10_service_grocery.png" width="200" alt="Grocery"/> | <img src="docs/screenshots/11_service_hotel_packages.png" width="200" alt="Hotels"/> | <img src="docs/screenshots/13_service_home_services.png" width="200" alt="Services"/> | <img src="docs/screenshots/03_orders_history.png" width="200" alt="Orders"/> |
 
-</div>
-
 </details>
+
+</div>
 
 ---
 

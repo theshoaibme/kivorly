@@ -9,6 +9,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 public struct ShoppingProductItem: Identifiable {
     public let id: String
@@ -22,6 +23,8 @@ public struct ShoppingProductItem: Identifiable {
     public let reviewCount: Int
     public let iconName: String
     public let emoji: String
+    public let imageAssetName: String
+    public let imageUrl: String
     public let availableSizes: [String]
     public let availableColors: [String]
     public let badges: [String]
@@ -36,6 +39,61 @@ public struct ShoppingCartItem: Identifiable {
     public var selectedSize: String
     public var selectedColor: String
     public var quantity: Int
+}
+
+// MARK: - Reusable Real Product Image Component
+public struct ShoppingProductImageView: View {
+    public let assetName: String
+    public let imageUrl: String
+    public let emojiFallback: String
+    public var height: CGFloat? = nil
+    public var cornerRadius: CGFloat = 14
+    public var contentMode: ContentMode = .fill
+
+    public var body: some View {
+        ZStack {
+            Color(uiColor: .secondarySystemFill)
+
+            if !assetName.isEmpty, let uiImage = UIImage(named: assetName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else if !imageUrl.isEmpty, let url = URL(string: imageUrl) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            Color(uiColor: .tertiarySystemFill)
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        }
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: contentMode)
+                    case .failure:
+                        fallbackView
+                    @unknown default:
+                        fallbackView
+                    }
+                }
+            } else {
+                fallbackView
+            }
+        }
+        .frame(height: height)
+        .frame(maxWidth: .infinity)
+        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
+    private var fallbackView: some View {
+        ZStack {
+            Color(uiColor: .tertiarySystemFill)
+            Text(emojiFallback)
+                .font(.system(size: 34))
+        }
+    }
 }
 
 public struct BangladeshShoppingView: View {
@@ -63,11 +121,11 @@ public struct BangladeshShoppingView: View {
     @State private var selectedPaymentMethod: String = "bKash"
 
     private let categories = [
-        "All", "Ethnic & Panjabi", "Casual Wear", "Footwear", "Smartphones & Tech", "Home Living"
+        "All", "Ethnic & Panjabi", "Casual Wear", "Women's Fashion", "Footwear", "Smartphones & Tech", "Electronics & Home", "Home Living", "Beauty & Care"
     ]
 
     private let brands = [
-        "All", "Aarong", "Yellow", "Apex", "Xiaomi BD", "Walton", "Artisan"
+        "All", "Aarong", "Yellow", "Apex", "Bata", "Xiaomi BD", "Walton", "Apple", "Samsung", "Artisan", "Taaga", "Lafz"
     ]
 
     private let catalogProducts: [ShoppingProductItem] = [
@@ -83,12 +141,14 @@ public struct BangladeshShoppingView: View {
             reviewCount: 1420,
             iconName: "tshirt.fill",
             emoji: "✨",
+            imageAssetName: "product_panjabi",
+            imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["38", "40", "42", "44"],
             availableColors: ["Royal Navy", "Pearl White", "Golden Beige"],
             badges: ["Official Store", "Handcrafted", "Best Seller"],
             deliveryTime: "Express 24h",
             warrantyText: "7-Day Easy Return",
-            description: "Traditional Bangladeshi handloom silk-cotton blend with intricate Nakshi Kantha neck embroidery. Perfect for Eid and weddings."
+            description: "Traditional Bangladeshi handloom silk-cotton blend with intricate Nakshi Kantha neck embroidery. Perfect for Eid, weddings, and formal occasions."
         ),
         ShoppingProductItem(
             id: "sp-2",
@@ -102,12 +162,14 @@ public struct BangladeshShoppingView: View {
             reviewCount: 890,
             iconName: "tshirt.fill",
             emoji: "👔",
+            imageAssetName: "product_shirt",
+            imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["S", "M", "L", "XL"],
             availableColors: ["Olive Green", "Sky Blue", "Jet Black"],
             badges: ["Official Store", "100% Cotton"],
             deliveryTime: "Next Day",
             warrantyText: "7-Day Easy Return",
-            description: "Tailored slim-fit long-sleeve casual shirt crafted with premium breathable Egyptian cotton."
+            description: "Tailored slim-fit long-sleeve casual shirt crafted with premium breathable Egyptian cotton with pearlized buttons."
         ),
         ShoppingProductItem(
             id: "sp-3",
@@ -121,12 +183,14 @@ public struct BangladeshShoppingView: View {
             reviewCount: 640,
             iconName: "shoeprints.fill",
             emoji: "👞",
+            imageAssetName: "product_oxford_shoes",
+            imageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["40", "41", "42", "43", "44"],
             availableColors: ["Classic Tan", "Deep Mahogany", "Jet Black"],
             badges: ["Genuine Leather", "Memory Foam"],
             deliveryTime: "Next Day",
             warrantyText: "30-Day Leather Guarantee",
-            description: "High-grade full-grain cow leather formal shoes with padded inner sole and durable rubber outsole."
+            description: "High-grade full-grain cow leather formal shoes with padded inner sole and durable rubber outsole for city commuting."
         ),
         ShoppingProductItem(
             id: "sp-4",
@@ -140,6 +204,8 @@ public struct BangladeshShoppingView: View {
             reviewCount: 2150,
             iconName: "iphone",
             emoji: "📱",
+            imageAssetName: "product_xiaomi_phone",
+            imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["8GB/256GB", "12GB/512GB"],
             availableColors: ["Midnight Black", "Aurora Purple", "Ocean Teal"],
             badges: ["Official BTRC Approved", "0% EMI Available"],
@@ -151,7 +217,7 @@ public struct BangladeshShoppingView: View {
             id: "sp-5",
             title: "Walton Primo 4K Ultra HD Smart TV 43\"",
             brand: "Walton",
-            category: "Smartphones & Tech",
+            category: "Electronics & Home",
             originalPrice: 33500,
             discountPrice: 28500,
             discountPercentage: "-15%",
@@ -159,6 +225,8 @@ public struct BangladeshShoppingView: View {
             reviewCount: 520,
             iconName: "tv.fill",
             emoji: "📺",
+            imageAssetName: "product_smart_tv",
+            imageUrl: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["43 Inch", "50 Inch", "55 Inch"],
             availableColors: ["Frameless Black"],
             badges: ["Official Store", "Free Home Setup"],
@@ -178,12 +246,308 @@ public struct BangladeshShoppingView: View {
             reviewCount: 380,
             iconName: "cup.and.saucer.fill",
             emoji: "🏺",
+            imageAssetName: "product_ceramic_dinner",
+            imageUrl: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600&auto=format&fit=crop&q=80",
             availableSizes: ["Standard 16 Pcs"],
             availableColors: ["Terracotta Rust", "Earthy Sand", "Glazed Sage"],
             badges: ["Microwave Safe", "Handmade"],
             deliveryTime: "Next Day",
             warrantyText: "Breakage Replacement",
             description: "Handcrafted eco-friendly stoneware ceramic dinner plates, bowls, and serving platters made by Bengal potters."
+        ),
+        ShoppingProductItem(
+            id: "sp-7",
+            title: "Traditional Dhakai Jamdani Handloom Silk Saree",
+            brand: "Aarong",
+            category: "Women's Fashion",
+            originalPrice: 11000,
+            discountPrice: 8500,
+            discountPercentage: "-23%",
+            rating: 4.98,
+            reviewCount: 1140,
+            iconName: "sparkles",
+            emoji: "🥻",
+            imageAssetName: "product_jamdani_saree",
+            imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["Standard 5.5m (With Blouse Piece)"],
+            availableColors: ["Crimson Red", "Royal Indigo", "Golden Zari"],
+            badges: ["GI Tag Certified", "Heritage Silk", "Official Store"],
+            deliveryTime: "Express 24h",
+            warrantyText: "Authenticity Verified",
+            description: "Authentic Bangladeshi UNESCO heritage Dhakai Jamdani saree woven by master weavers in Sonargaon using fine mulberry silk."
+        ),
+        ShoppingProductItem(
+            id: "sp-8",
+            title: "Apple iPhone 15 Pro (128GB, Natural Titanium)",
+            brand: "Apple",
+            category: "Smartphones & Tech",
+            originalPrice: 149999,
+            discountPrice: 138000,
+            discountPercentage: "-8%",
+            rating: 4.97,
+            reviewCount: 3820,
+            iconName: "iphone.gen3",
+            emoji: "📱",
+            imageAssetName: "product_iphone",
+            imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["128GB", "256GB", "512GB"],
+            availableColors: ["Natural Titanium", "Blue Titanium", "Black Titanium"],
+            badges: ["Official Apple Warranty", "BTRC Verified", "0% EMI"],
+            deliveryTime: "Express Same-Day",
+            warrantyText: "1-Year Apple Warranty",
+            description: "Aerospace-grade titanium design, A17 Pro chip, Action button, 48MP main camera system with USB-C and 3x telephoto zoom."
+        ),
+        ShoppingProductItem(
+            id: "sp-9",
+            title: "Wireless Active Noise Cancelling Headphones",
+            brand: "Xiaomi BD",
+            category: "Smartphones & Tech",
+            originalPrice: 5800,
+            discountPrice: 4500,
+            discountPercentage: "-22%",
+            rating: 4.88,
+            reviewCount: 840,
+            iconName: "headphones",
+            emoji: "🎧",
+            imageAssetName: "product_headphones",
+            imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["Over-Ear Studio"],
+            availableColors: ["Matte Black", "Silver Gray", "Deep Navy"],
+            badges: ["Hi-Res Audio", "40h Battery", "Hybrid ANC"],
+            deliveryTime: "Next Day",
+            warrantyText: "6-Month Brand Warranty",
+            description: "40mm dynamic bio-cellulose drivers, 43dB hybrid active noise cancellation, dual transparency mode, and ultra-plush memory foam."
+        ),
+        ShoppingProductItem(
+            id: "sp-10",
+            title: "Bata Power Energy-Return Running Sneakers",
+            brand: "Bata",
+            category: "Footwear",
+            originalPrice: 3990,
+            discountPrice: 3290,
+            discountPercentage: "-18%",
+            rating: 4.85,
+            reviewCount: 730,
+            iconName: "figure.run",
+            emoji: "👟",
+            imageAssetName: "product_bata_sneakers",
+            imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["39", "40", "41", "42", "43", "44"],
+            availableColors: ["Velocity Red", "Graphite Black", "Cloud White"],
+            badges: ["Ultra Light", "Breathable Mesh", "Bata Official"],
+            deliveryTime: "Next Day",
+            warrantyText: "30-Day Sole Warranty",
+            description: "Engineered high-rebound midsole technology for daily jogging, city walks, and high-impact training on Dhaka roads."
+        ),
+        ShoppingProductItem(
+            id: "sp-11",
+            title: "Handcrafted Vegetable-Tanned Leather Tote Bag",
+            brand: "Aarong",
+            category: "Women's Fashion",
+            originalPrice: 5200,
+            discountPrice: 4250,
+            discountPercentage: "-18%",
+            rating: 4.93,
+            reviewCount: 510,
+            iconName: "bag.fill",
+            emoji: "👜",
+            imageAssetName: "product_leather_bag",
+            imageUrl: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["Medium (14x11 in)", "Large (16x13 in)"],
+            availableColors: ["Caramel Tan", "Vintage Brown", "Midnight Black"],
+            badges: ["100% Genuine Leather", "Aarong Artisan", "Best Seller"],
+            deliveryTime: "Next Day",
+            warrantyText: "1-Year Leather Warranty",
+            description: "Full-grain natural cow leather with brass zippers and interior laptop sleeve. Handcrafted by rural artisans in Manikganj."
+        ),
+        ShoppingProductItem(
+            id: "sp-12",
+            title: "Samsung Galaxy Watch6 Bluetooth 44mm",
+            brand: "Samsung",
+            category: "Smartphones & Tech",
+            originalPrice: 26000,
+            discountPrice: 22500,
+            discountPercentage: "-13%",
+            rating: 4.91,
+            reviewCount: 920,
+            iconName: "applewatch",
+            emoji: "⌚",
+            imageAssetName: "product_smartwatch",
+            imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["40mm", "44mm"],
+            availableColors: ["Graphite Black", "Silver", "Gold Sand"],
+            badges: ["ECG & Sleep Coach", "Sapphire Crystal", "Official BD"],
+            deliveryTime: "Express 24h",
+            warrantyText: "1-Year Official Warranty",
+            description: "Advanced health monitoring with personalized heart rate zones, body composition analysis, sapphire crystal glass, and IP68 waterproof rating."
+        ),
+        ShoppingProductItem(
+            id: "sp-13",
+            title: "Yellow Relaxed-Fit Washed Denim Jeans",
+            brand: "Yellow",
+            category: "Casual Wear",
+            originalPrice: 3400,
+            discountPrice: 2750,
+            discountPercentage: "-19%",
+            rating: 4.87,
+            reviewCount: 1180,
+            iconName: "figure.walk",
+            emoji: "👖",
+            imageAssetName: "product_denim_jeans",
+            imageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["30", "32", "34", "36", "38"],
+            availableColors: ["Vintage Medium Blue", "Dark Indigo", "Faded Charcoal"],
+            badges: ["Stretch Denim", "Comfort Fit", "Official Store"],
+            deliveryTime: "Next Day",
+            warrantyText: "7-Day Easy Return",
+            description: "Premium 99% ring-spun cotton denim with 1% elastane for flexible all-day comfort. Enzyme washed with reinforced stitching."
+        ),
+        ShoppingProductItem(
+            id: "sp-14",
+            title: "Walton Double-Door Frost-Free Refrigerator (252L)",
+            brand: "Walton",
+            category: "Electronics & Home",
+            originalPrice: 44500,
+            discountPrice: 38900,
+            discountPercentage: "-13%",
+            rating: 4.89,
+            reviewCount: 670,
+            iconName: "refrigerator.fill",
+            emoji: "🧊",
+            imageAssetName: "product_refrigerator",
+            imageUrl: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["252 Litres", "310 Litres"],
+            availableColors: ["Glass Mirror Black", "Floral Burgundy"],
+            badges: ["12-Year Inverter Guarantee", "Free Installation", "A+++ Energy"],
+            deliveryTime: "Scheduled 48h",
+            warrantyText: "12-Year Compressor Warranty",
+            description: "Intelligent inverter technology with nano silver anti-bacterial filter and wide voltage design suitable for Bangladesh power fluctuations."
+        ),
+        ShoppingProductItem(
+            id: "sp-15",
+            title: "Handloom Bengal Nakshi Kantha Bedspread",
+            brand: "Artisan",
+            category: "Home Living",
+            originalPrice: 4600,
+            discountPrice: 3800,
+            discountPercentage: "-17%",
+            rating: 4.96,
+            reviewCount: 430,
+            iconName: "bed.double.fill",
+            emoji: "🛏️",
+            imageAssetName: "product_nakshi_kantha",
+            imageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["King (90x100 in)", "Queen (80x90 in)"],
+            availableColors: ["Ivory & Crimson", "Indigo Blue", "Multi-Color Classic"],
+            badges: ["100% Pure Cotton", "Hand-Stitched", "Heritage Craft"],
+            deliveryTime: "Next Day",
+            warrantyText: "Authenticity Verified",
+            description: "Traditional folk-art quilt made of layered pure cotton fabric, embroidered entirely by hand with mythological Bengal village motifs."
+        ),
+        ShoppingProductItem(
+            id: "sp-16",
+            title: "Taaga Contemporary Fusion Kurti Tunic",
+            brand: "Taaga",
+            category: "Women's Fashion",
+            originalPrice: 2450,
+            discountPrice: 1950,
+            discountPercentage: "-20%",
+            rating: 4.86,
+            reviewCount: 690,
+            iconName: "tshirt",
+            emoji: "👗",
+            imageAssetName: "product_fusion_kurti",
+            imageUrl: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["XS", "S", "M", "L", "XL"],
+            availableColors: ["Mustard Floral", "Olive Green", "Teal Geometric"],
+            badges: ["Official Store", "Breathable Viscose"],
+            deliveryTime: "Next Day",
+            warrantyText: "7-Day Easy Return",
+            description: "Modern bohemian-cut tunic crafted with soft breathable viscose georgette. Styled for casual university wear and corporate office days."
+        ),
+        ShoppingProductItem(
+            id: "sp-17",
+            title: "Apex Venturini Classic Leather Loafers",
+            brand: "Apex",
+            category: "Footwear",
+            originalPrice: 4990,
+            discountPrice: 3990,
+            discountPercentage: "-20%",
+            rating: 4.88,
+            reviewCount: 580,
+            iconName: "shoe.fill",
+            emoji: "👞",
+            imageAssetName: "product_loafers",
+            imageUrl: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["40", "41", "42", "43", "44"],
+            availableColors: ["Rich Burgundy", "Deep Tan", "Jet Black"],
+            badges: ["Venturini Signature", "Padded Insole"],
+            deliveryTime: "Next Day",
+            warrantyText: "30-Day Leather Guarantee",
+            description: "Italian inspired slip-on penny loafers crafted from burnished genuine cowhide leather with a flexible anti-skid rubber sole."
+        ),
+        ShoppingProductItem(
+            id: "sp-18",
+            title: "Walton Convection Smart Microwave Oven (25L)",
+            brand: "Walton",
+            category: "Electronics & Home",
+            originalPrice: 13500,
+            discountPrice: 11200,
+            discountPercentage: "-17%",
+            rating: 4.82,
+            reviewCount: 340,
+            iconName: "microwave.fill",
+            emoji: "🍳",
+            imageAssetName: "product_microwave",
+            imageUrl: "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["25 Litres"],
+            availableColors: ["Stainless Silver", "Obsidian Black"],
+            badges: ["Bake & Grill", "Auto Deshi Menu", "Child Lock"],
+            deliveryTime: "Scheduled 24h",
+            warrantyText: "2-Year Official Warranty",
+            description: "Multi-stage cooking with convection baking, quartz grill heater, 8 auto-cooking programs tailored for local cuisine, and easy-clean cavity."
+        ),
+        ShoppingProductItem(
+            id: "sp-19",
+            title: "Organic Saffron Radiance Facial Glow Serum",
+            brand: "Lafz",
+            category: "Beauty & Care",
+            originalPrice: 1450,
+            discountPrice: 1150,
+            discountPercentage: "-21%",
+            rating: 4.94,
+            reviewCount: 1290,
+            iconName: "sparkle",
+            emoji: "✨",
+            imageAssetName: "product_face_serum",
+            imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["30ml Dropper", "50ml Bottle"],
+            availableColors: ["Pure Golden Elixir"],
+            badges: ["100% Halal Certified", "Cruelty Free", "Top Rated"],
+            deliveryTime: "Express 24h",
+            warrantyText: "100% Original Guarantee",
+            description: "Infused with pure Kashmiri saffron strands, niacinamide, and hyaluronic acid for glowing radiant skin without parabens or harsh chemicals."
+        ),
+        ShoppingProductItem(
+            id: "sp-20",
+            title: "Hand-Hammered Antique Brass Floor Lamp",
+            brand: "Artisan",
+            category: "Home Living",
+            originalPrice: 6200,
+            discountPrice: 4900,
+            discountPercentage: "-21%",
+            rating: 4.90,
+            reviewCount: 280,
+            iconName: "lamp.floor.fill",
+            emoji: "🪔",
+            imageAssetName: "product_brass_lamp",
+            imageUrl: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80",
+            availableSizes: ["4.5 ft Floor Stand"],
+            availableColors: ["Aged Brass", "Brushed Copper"],
+            badges: ["Solid Brass", "Hand-Etched Motifs"],
+            deliveryTime: "Scheduled 24h",
+            warrantyText: "Lifetime Brass Guarantee",
+            description: "Traditional Bengali craft revival piece hand-carved with floral filigree patterns that cast warm enchanting ambient patterns on walls."
         )
     ]
 
@@ -543,13 +907,14 @@ public struct BangladeshShoppingView: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Top Image & Discount Tag Container
                 ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(ServiceType.shopping.accentTint.opacity(0.08))
-                        .frame(height: 125)
-
-                    Text(product.emoji)
-                        .font(.system(size: 52))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    ShoppingProductImageView(
+                        assetName: product.imageAssetName,
+                        imageUrl: product.imageUrl,
+                        emojiFallback: product.emoji,
+                        height: 135,
+                        cornerRadius: 14,
+                        contentMode: .fill
+                    )
 
                     // Discount Pill
                     Text(product.discountPercentage)
@@ -689,13 +1054,14 @@ public struct BangladeshShoppingView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Big Image Container
                     ZStack(alignment: .topTrailing) {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(ServiceType.shopping.accentTint.opacity(0.08))
-                            .frame(height: 220)
-
-                        Text(product.emoji)
-                            .font(.system(size: 96))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        ShoppingProductImageView(
+                            assetName: product.imageAssetName,
+                            imageUrl: product.imageUrl,
+                            emojiFallback: product.emoji,
+                            height: 250,
+                            cornerRadius: 20,
+                            contentMode: .fill
+                        )
 
                         Text(product.discountPercentage)
                             .font(.system(size: 12, weight: .black))
@@ -924,11 +1290,15 @@ public struct BangladeshShoppingView: View {
                                 ForEach(cartItems.indices, id: \.self) { idx in
                                     let item = cartItems[idx]
                                     HStack(spacing: 12) {
-                                        Text(item.product.emoji)
-                                            .font(.system(size: 28))
-                                            .frame(width: 44, height: 44)
-                                            .background(ServiceType.shopping.accentTint.opacity(0.1))
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        ShoppingProductImageView(
+                                            assetName: item.product.imageAssetName,
+                                            imageUrl: item.product.imageUrl,
+                                            emojiFallback: item.product.emoji,
+                                            height: 48,
+                                            cornerRadius: 10,
+                                            contentMode: .fill
+                                        )
+                                        .frame(width: 48, height: 48)
 
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(item.product.title)
