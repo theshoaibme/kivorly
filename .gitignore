@@ -1,0 +1,28 @@
+# Xcode
+## User settings
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+## Build generated
+build/
+DerivedData/
+*.moved-aside
+
+## Project specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
