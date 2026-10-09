@@ -3,7 +3,7 @@
 <img src="web/public/app-icon.png" width="96" alt="Kivorly Logo"/>
 
 # Kivorly 🇧🇩
-### The Everything Super App for Bangladesh
+### The Everything In One App for Bangladesh
 
 [![Version](https://img.shields.io/badge/Version-v1.0.0-006A4E?style=flat-square)](https://github.com/theshoaibme/kivorly/releases)
 [![iOS](https://img.shields.io/badge/iOS-SwiftUI%2017%2B-007AFF?style=flat-square&logo=apple&logoColor=white)](ios/)
@@ -13,7 +13,8 @@
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-Automated-34C759?style=flat-square&logo=github-actions&logoColor=white)](.github/workflows/ci-cd.yml)
 
 <p align="center">
-  A high-performance multi-platform super app unifying <b>Rides, Travel Tickets, Parcel Courier, Brand Shopping, Daily Groceries, Hotel Stays, Food Delivery, and Home Services</b> across Dhaka and all 64 districts in Bangladesh.
+  <b>Your everyday life in Bangladesh, simplified in one app.</b><br>
+  From hailing a quick ride across Dhaka and booking inter-city tickets, to sending parcels, shopping top brands, ordering fresh groceries, and reserving resort getaways — <b>Kivorly</b> connects you to all your daily needs with local payments (bKash, Nagad, COD) and real-time tracking across all 64 districts.
 </p>
 
 </div>
