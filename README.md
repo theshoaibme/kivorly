@@ -4,11 +4,11 @@
 ### The Everything Super App for Bangladesh
 
 [![iOS Platform](https://img.shields.io/badge/Platform-iOS%2017%2B-007AFF?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/theshoaibme/kivorly)
+[![Android](https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/theshoaibme/kivorly)
+[![Web Platform](https://img.shields.io/badge/Web-Next.js%2016-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://github.com/theshoaibme/kivorly)
 [![Country](https://img.shields.io/badge/Country-Bangladesh%20%F0%9F%87%A7%F0%9F%87%A9-006A4E?style=for-the-badge)](https://github.com/theshoaibme/kivorly)
 [![Currency](https://img.shields.io/badge/Currency-%E0%A7%B3%20BDT-F42A41?style=for-the-badge)](https://github.com/theshoaibme/kivorly)
-[![Payment Methods](https://img.shields.io/badge/Payments-bKash%20%7C%20Nagad%20%7C%20COD-D12053?style=for-the-badge)](https://github.com/theshoaibme/kivorly)
-[![Build Status](https://img.shields.io/badge/Build-Passing-34C759?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/theshoaibme/kivorly/actions)
-[![License](https://img.shields.io/badge/License-Proprietary-5856D6?style=for-the-badge)](https://github.com/theshoaibme/kivorly)
+[![Build Status](https://img.shields.io/badge/CI%2FCD-Passing-34C759?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/theshoaibme/kivorly/actions)
 
 <p align="center">
   <b>One unified app for everything you need daily across Dhaka and all 64 districts.</b><br>
@@ -72,6 +72,69 @@
 - **Local Payment Gateways**: Seamless integration with **bKash**, **Nagad**, and **Cash on Delivery**.
 - **Live Order Tracking**: Dynamic Island notifications and real-time status updates from dispatch to doorstep.
 - **Clean & Elegant Design**: Thoughtful typography, smooth transitions, and delightful user experience.
+
+---
+
+## 🏗️ Multi-Platform Monorepo Architecture
+
+```
+kivorly/
+├── ios/                    # 🍏 Native Apple iOS Application (iOS 17+)
+│   ├── Kivorly.xcodeproj   # Xcode Project (Target & Scheme: Kivorly)
+│   └── Kivorly/            # Core, Features, Shared Components, and Assets.xcassets
+├── android/                # 🤖 Native Android Application (Kotlin & Jetpack Compose)
+│   ├── app/                # Application module (Clean Architecture & Compose UI)
+│   ├── gradle/             # Gradle wrapper & Version Catalog (libs.versions.toml)
+│   └── build.gradle.kts    # Gradle build configuration
+├── web/                    # 🌐 Web Portal & Responsive Landing (Next.js 16 + React 19)
+│   ├── src/app/            # App Router with live interactive vertical showcase
+│   └── public/             # Static brand assets & service screenshots
+├── docs/                   # 📸 App screenshots & UI documentation
+└── .github/workflows/      # ⚙️ Multi-platform automated CI/CD pipelines
+```
+
+---
+
+## 🛠️ Getting Started
+
+### 1. 🍏 iOS Application
+
+- **Requirements**: macOS Sonoma/Sequoia, Xcode 16+, iOS 17.0+
+- **Open Project**:
+  ```bash
+  open ios/Kivorly.xcodeproj
+  ```
+- **CLI Build**:
+  ```bash
+  xcodebuild build \
+    -project ios/Kivorly.xcodeproj \
+    -scheme Kivorly \
+    -destination "generic/platform=iOS Simulator" \
+    CODE_SIGNING_ALLOWED=NO
+  ```
+
+### 2. 🤖 Android Application
+
+- **Requirements**: Android Studio Ladybug+, Java 17, Android SDK 35
+- **Build Debug APK**:
+  ```bash
+  cd android
+  ./gradlew assembleDebug
+  ```
+
+### 3. 🌐 Web Portal (Next.js)
+
+- **Requirements**: Node.js 20+, pnpm 10+
+- **Development Server**:
+  ```bash
+  cd web
+  pnpm install
+  pnpm dev
+  ```
+- **Production Build**:
+  ```bash
+  pnpm --dir web build
+  ```
 
 ---
 
