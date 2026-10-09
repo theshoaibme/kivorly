@@ -360,6 +360,61 @@ public struct ServiceCheckoutModal: View {
         isProcessing = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isProcessing = false
+            let cleanCode = item.serviceType.shortTitle.replacingOccurrences(of: " ", with: "").uppercased()
+            let orderId = "KV-\(cleanCode)-\(Int.random(in: 100000...999999))-BD"
+            let finalTotal = totalPrice + platformFee
+
+            let newOrder = SuperAppOrder(
+                id: orderId,
+                service: item.serviceType,
+                title: item.title,
+                subtitle: "\(quantity) unit(s) • \(item.category)",
+                timestamp: "Just now",
+                amount: String(format: "\u{09F3}%.0f", finalTotal),
+                rawAmount: finalTotal,
+                status: .inProgress,
+                etaText: "Arriving in \(item.etaOrDuration)",
+                pickupLocation: "\(item.title) Hub, Dhaka",
+                destinationLocation: "Road 71, House 14, Gulshan 2, Dhaka",
+                driverOrPartner: OrderPartner(
+                    name: "Kivorly Verified Specialist",
+                    role: "\(item.serviceType.shortTitle) Partner",
+                    rating: 4.9,
+                    completedTrips: 1140,
+                    phone: "+880 1712-345678"
+                ),
+                securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+                trackingNumber: "TRK-\(Int.random(in: 100000...999999))-BD",
+                qrPassCode: "\(orderId)-QR",
+                bookingDetails: nil,
+                items: [
+                    OrderLineItem(
+                        title: item.title,
+                        subtitle: item.category,
+                        quantity: quantity,
+                        price: item.numericPrice,
+                        emoji: "📦"
+                    )
+                ],
+                timelineSteps: [
+                    OrderTimelineStep(title: "Order Placed", subtitle: "Payment confirmed via \(selectedPaymentMethod)", time: "Just now", isCompleted: true),
+                    OrderTimelineStep(title: "Confirmed by Merchant", subtitle: "Processing requested service", time: "Just now", isCompleted: true, isCurrent: true),
+                    OrderTimelineStep(title: "Preparing Order", subtitle: "Packing items / preparing specialist", time: "Pending", isCompleted: false),
+                    OrderTimelineStep(title: "En Route", subtitle: "Heading to delivery destination", time: "Estimated \(item.etaOrDuration)", isCompleted: false),
+                    OrderTimelineStep(title: "Delivered & Verified", subtitle: "Handed over at doorstep", time: "Estimated \(item.etaOrDuration)", isCompleted: false)
+                ],
+                paymentBreakdown: OrderPaymentBreakdown(
+                    subtotal: totalPrice,
+                    deliveryOrFareFee: 0,
+                    platformFee: platformFee,
+                    discount: 0,
+                    total: finalTotal,
+                    paymentMethod: selectedPaymentMethod,
+                    transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+                )
+            )
+            OrdersManager.shared.addOrder(newOrder)
+
             withAnimation(.spring()) {
                 isSuccess = true
             }

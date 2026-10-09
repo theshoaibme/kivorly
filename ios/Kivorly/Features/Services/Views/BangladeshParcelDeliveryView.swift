@@ -635,7 +635,61 @@ public struct BangladeshParcelDeliveryView: View {
                 }
 
                 Button(action: {
-                    activeTrackingNumber = "KVP-\(Int.random(in: 100000...999999))-BD"
+                    let tracking = "KVP-\(Int.random(in: 100000...999999))-BD"
+                    activeTrackingNumber = tracking
+
+                    let parcelOrder = SuperAppOrder(
+                        id: tracking,
+                        service: .courier,
+                        title: "Express Parcel • \(receiverDistrict)",
+                        subtitle: "\(selectedCategory.rawValue) • \(selectedSpeed.rawValue)",
+                        timestamp: "Just now",
+                        amount: String(format: "\u{09F3}%.0f", calculatedFare),
+                        rawAmount: calculatedFare,
+                        status: .inProgress,
+                        etaText: selectedSpeed.estimatedTime,
+                        pickupLocation: "\(senderArea), Dhaka",
+                        destinationLocation: "\(receiverDistrict), Bangladesh",
+                        driverOrPartner: OrderPartner(
+                            name: "Tanvir Ahmed",
+                            role: "Express Courier Rider",
+                            rating: 4.9,
+                            completedTrips: 2150,
+                            phone: "+880 1677-554433",
+                            vehicleInfo: "Yamaha Saluto 125cc"
+                        ),
+                        securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+                        trackingNumber: tracking,
+                        qrPassCode: nil,
+                        bookingDetails: nil,
+                        items: [
+                            OrderLineItem(
+                                title: "\(selectedCategory.rawValue) (\(selectedCategory.weightLimit))",
+                                subtitle: "\(senderArea) to \(receiverDistrict)",
+                                quantity: 1,
+                                price: calculatedFare,
+                                emoji: "📦"
+                            )
+                        ],
+                        timelineSteps: [
+                            OrderTimelineStep(title: "Pickup Requested", subtitle: "Courier assigned", time: "Just now", isCompleted: true),
+                            OrderTimelineStep(title: "Rider Heading to Sender", subtitle: "Arriving in \(senderArea)", time: "Just now", isCompleted: true, isCurrent: true),
+                            OrderTimelineStep(title: "Parcel Picked Up", subtitle: "Sealed & scanned", time: "Pending", isCompleted: false),
+                            OrderTimelineStep(title: "In Transit", subtitle: "En route to destination", time: "Estimated \(selectedSpeed.estimatedTime)", isCompleted: false),
+                            OrderTimelineStep(title: "Delivered", subtitle: "OTP verified handover", time: "Estimated \(selectedSpeed.estimatedTime)", isCompleted: false)
+                        ],
+                        paymentBreakdown: OrderPaymentBreakdown(
+                            subtotal: calculatedFare,
+                            deliveryOrFareFee: 0,
+                            platformFee: 0,
+                            discount: 0,
+                            total: calculatedFare,
+                            paymentMethod: selectedPaymentMethod,
+                            transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+                        )
+                    )
+                    OrdersManager.shared.addOrder(parcelOrder)
+
                     showTrackingSheet = true
                 }) {
                     HStack(spacing: 8) {

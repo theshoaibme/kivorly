@@ -874,10 +874,7 @@ public struct BangladeshGroceryView: View {
 
                     // Confirm Order Button
                     Button(action: {
-                        confirmedOrderId = "KVG-\(Int.random(in: 100000...999999))-BD"
-                        cart.removeAll()
-                        showBasketSheet = false
-                        showOrderConfirmed = true
+                        confirmGroceryOrder()
                     }) {
                         HStack(spacing: 6) {
                             Text("Confirm Grocery Order")
@@ -973,5 +970,68 @@ public struct BangladeshGroceryView: View {
             }
             .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         }
+    }
+    private func confirmGroceryOrder() {
+        let generatedOrderId = "KVG-\(Int.random(in: 100000...999999))-BD"
+        let fee: Double = basketTotal >= freeDeliveryThreshold ? 0.0 : 40.0
+        let totalAmt = basketTotal + fee
+        let lineItems = cart.compactMap { (itemId, qty) -> OrderLineItem? in
+            guard let p = groceryCatalog.first(where: { $0.id == itemId }) else { return nil }
+            return OrderLineItem(
+                title: p.name,
+                subtitle: p.unit,
+                quantity: qty,
+                price: p.price,
+                emoji: p.emoji
+            )
+        }
+
+        let groceryOrder = SuperAppOrder(
+            id: generatedOrderId,
+            service: .grocery,
+            title: "Daily Fresh Farm & Groceries",
+            subtitle: "\(cart.count) item(s) • Fresh Mart Dhaka",
+            timestamp: "Just now",
+            amount: String(format: "\u{09F3}%.0f", totalAmt),
+            rawAmount: totalAmt,
+            status: .inProgress,
+            etaText: "Arriving in ~25 mins",
+            pickupLocation: "Shwapno Express Mart, Gulshan 2",
+            destinationLocation: "Road 71, House 14, Flat 4B, Gulshan 2, Dhaka",
+            driverOrPartner: OrderPartner(
+                name: "Sajjad Hossain",
+                role: "Grocery Delivery Partner",
+                rating: 4.8,
+                completedTrips: 1120,
+                phone: "+880 1711-998877",
+                vehicleInfo: "Electric Delivery Scooter"
+            ),
+            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+            trackingNumber: "GROC-BD-\(Int.random(in: 100000...999999))",
+            qrPassCode: nil,
+            bookingDetails: nil,
+            items: lineItems,
+            timelineSteps: [
+                OrderTimelineStep(title: "Order Placed", subtitle: "Payment confirmed via \(selectedPaymentMethod)", time: "Just now", isCompleted: true),
+                OrderTimelineStep(title: "Packed by Store", subtitle: "Freshly selected from shelf", time: "Just now", isCompleted: true, isCurrent: true),
+                OrderTimelineStep(title: "Rider En Route", subtitle: "Heading to your doorstep", time: "Estimated 15m", isCompleted: false),
+                OrderTimelineStep(title: "Delivered", subtitle: "Handed over safely", time: "Estimated 25m", isCompleted: false)
+            ],
+            paymentBreakdown: OrderPaymentBreakdown(
+                subtotal: basketTotal,
+                deliveryOrFareFee: fee,
+                platformFee: 0,
+                discount: 0,
+                total: totalAmt,
+                paymentMethod: selectedPaymentMethod,
+                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+            )
+        )
+        OrdersManager.shared.addOrder(groceryOrder)
+
+        confirmedOrderId = generatedOrderId
+        cart.removeAll()
+        showBasketSheet = false
+        showOrderConfirmed = true
     }
 }

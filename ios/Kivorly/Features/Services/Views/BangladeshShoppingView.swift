@@ -1429,7 +1429,66 @@ public struct BangladeshShoppingView: View {
 
                     // Checkout Button
                     Button(action: {
-                        confirmedOrderId = "KVS-\(Int.random(in: 100000...999999))-BD"
+                        let generatedOrderId = "KVS-\(Int.random(in: 100000...999999))-BD"
+                        let deliveryFee = cartTotal >= 1500 ? 0.0 : 60.0
+                        let totalAmt = cartTotal + deliveryFee
+
+                        let lineItems = cartItems.map { ci in
+                            OrderLineItem(
+                                title: ci.product.title,
+                                subtitle: "\(ci.selectedColor) • Size \(ci.selectedSize)",
+                                quantity: ci.quantity,
+                                price: ci.product.discountPrice,
+                                imageAssetName: ci.product.imageAssetName,
+                                emoji: ci.product.emoji
+                            )
+                        }
+
+                        let shoppingOrder = SuperAppOrder(
+                            id: generatedOrderId,
+                            service: .shopping,
+                            title: cartItems.first?.product.brand ?? "Kivorly Mall",
+                            subtitle: "\(cartItems.count) item(s) • \(cartItems.first?.product.title ?? "")",
+                            timestamp: "Just now",
+                            amount: String(format: "\u{09F3}%.0f", totalAmt),
+                            rawAmount: totalAmt,
+                            status: .inProgress,
+                            etaText: "Delivery by Tomorrow, 4:00 PM",
+                            pickupLocation: "Kivorly Mall Central Hub, Tejgaon, Dhaka",
+                            destinationLocation: "Road 71, House 14, Flat 4B, Gulshan 2, Dhaka",
+                            driverOrPartner: OrderPartner(
+                                name: "Steadfast Express Delivery",
+                                role: "Official Courier Hub",
+                                rating: 4.9,
+                                completedTrips: 15400,
+                                phone: "+880 9612-004488",
+                                vehicleInfo: "Delivery Van • Dhaka Metro Da 12-4011"
+                            ),
+                            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+                            trackingNumber: "STEADFAST-BD-\(Int.random(in: 100000...999999))",
+                            qrPassCode: nil,
+                            bookingDetails: nil,
+                            items: lineItems,
+                            timelineSteps: [
+                                OrderTimelineStep(title: "Order Placed", subtitle: "Payment confirmed via \(selectedPaymentMethod)", time: "Just now", isCompleted: true),
+                                OrderTimelineStep(title: "Confirmed by Merchant", subtitle: "Official seller packing order", time: "Just now", isCompleted: true, isCurrent: true),
+                                OrderTimelineStep(title: "Dispatched from Tejgaon Hub", subtitle: "Assigned to Steadfast Express", time: "Pending", isCompleted: false),
+                                OrderTimelineStep(title: "Out for Delivery", subtitle: "Courier will call before arrival", time: "Tomorrow 02:00 PM", isCompleted: false),
+                                OrderTimelineStep(title: "Delivered & Verified", subtitle: "Delivery to Gulshan 2", time: "Tomorrow 04:00 PM", isCompleted: false)
+                            ],
+                            paymentBreakdown: OrderPaymentBreakdown(
+                                subtotal: cartTotal,
+                                deliveryOrFareFee: deliveryFee,
+                                platformFee: 0,
+                                discount: 0,
+                                total: totalAmt,
+                                paymentMethod: selectedPaymentMethod,
+                                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+                            )
+                        )
+                        OrdersManager.shared.addOrder(shoppingOrder)
+
+                        confirmedOrderId = generatedOrderId
                         cartItems.removeAll()
                         showCartSheet = false
                         showOrderConfirmation = true

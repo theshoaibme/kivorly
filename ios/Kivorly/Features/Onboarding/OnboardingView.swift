@@ -7,11 +7,29 @@
 
 import SwiftUI
 
+public enum OnboardingIllustrationType {
+    case servicesSolarOrbit
+    case standardIcon
+}
+
 public struct OnboardingPage: Identifiable {
     public let id = UUID()
     public let icon: String
     public let title: String
     public let badge: String
+    public let illustrationType: OnboardingIllustrationType
+
+    public init(
+        icon: String,
+        title: String,
+        badge: String,
+        illustrationType: OnboardingIllustrationType = .standardIcon
+    ) {
+        self.icon = icon
+        self.title = title
+        self.badge = badge
+        self.illustrationType = illustrationType
+    }
 }
 
 public struct OnboardingView: View {
@@ -22,8 +40,9 @@ public struct OnboardingView: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "square.grid.3x3.topleft.filled",
-            title: "8 Services in One App",
-            badge: "All-in-one"
+            title: "Services in One App",
+            badge: "",
+            illustrationType: .servicesSolarOrbit
         ),
         OnboardingPage(
             icon: "map.fill",

@@ -844,9 +844,7 @@ public struct BangladeshHotelsBookingView: View {
                         }
 
                         Button(action: {
-                            confirmedBookingId = "KVH-\(Int.random(in: 100000...999999))-BD"
-                            selectedPackageForBooking = nil
-                            showConfirmationVoucher = true
+                            confirmHotel(package: package, fare: totalPackageFare)
                         }) {
                             HStack(spacing: 6) {
                                 Text("Confirm Reservation")
@@ -951,5 +949,68 @@ public struct BangladeshHotelsBookingView: View {
             }
             .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         }
+    }
+    private func confirmHotel(package: HotelPackageItem, fare: Double) {
+        let bookingId = "KV-HOTEL-\(Int.random(in: 100000...999999))-BD"
+        confirmedBookingId = bookingId
+
+        let hotelOrder = SuperAppOrder(
+            id: bookingId,
+            service: .hotels,
+            title: "\(package.resortName) (\(package.roomType))",
+            subtitle: "\(package.location) • \(numberOfGuests) Guests",
+            timestamp: "Just now",
+            amount: String(format: "\u{09F3}%.0f", fare),
+            rawAmount: fare,
+            status: .confirmed,
+            etaText: "Check-in in 2 days",
+            pickupLocation: nil,
+            destinationLocation: "\(package.resortName), \(package.location)",
+            driverOrPartner: OrderPartner(
+                name: "\(package.resortName) Front Desk",
+                role: "Verified Hospitality Partner",
+                rating: package.rating,
+                completedTrips: 4500,
+                phone: "+880 1819-009988",
+                vehicleInfo: "Complimentary Airport Shuttle"
+            ),
+            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+            trackingNumber: "RES-\(bookingId)",
+            qrPassCode: "HOTEL-\(bookingId)-CONFIRMED",
+            bookingDetails: OrderBookingDetails(
+                roomType: package.roomType,
+                checkInDate: "12 Oct 2026, 02:00 PM",
+                checkOutDate: "14 Oct 2026, 12:00 PM",
+                guestCount: numberOfGuests
+            ),
+            items: [
+                OrderLineItem(
+                    title: "\(package.roomType) (\(package.packageType.rawValue))",
+                    subtitle: package.location,
+                    quantity: numberOfRooms,
+                    price: package.price,
+                    emoji: package.emoji
+                )
+            ],
+            timelineSteps: [
+                OrderTimelineStep(title: "Reservation Confirmed", subtitle: "Guaranteed by \(package.resortName)", time: "Just now", isCompleted: true),
+                OrderTimelineStep(title: "Voucher Issued", subtitle: "Digital Check-In QR Pass ready", time: "Just now", isCompleted: true, isCurrent: true),
+                OrderTimelineStep(title: "Check-In", subtitle: "Present QR Pass at front desk", time: "12 Oct, 02:00 PM", isCompleted: false),
+                OrderTimelineStep(title: "Check-Out", subtitle: "Express checkout available", time: "14 Oct, 12:00 PM", isCompleted: false)
+            ],
+            paymentBreakdown: OrderPaymentBreakdown(
+                subtotal: fare,
+                deliveryOrFareFee: 0,
+                platformFee: 0,
+                discount: 0,
+                total: fare,
+                paymentMethod: selectedPaymentMethod,
+                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+            )
+        )
+        OrdersManager.shared.addOrder(hotelOrder)
+
+        selectedPackageForBooking = nil
+        showConfirmationVoucher = true
     }
 }

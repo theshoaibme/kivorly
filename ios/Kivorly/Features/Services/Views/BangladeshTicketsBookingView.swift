@@ -1253,9 +1253,7 @@ public struct BangladeshTicketsBookingView: View {
                             Spacer()
 
                             Button(action: {
-                                selectedTicket = nil
-                                confirmedPNR = "KV-\(Int.random(in: 100000...999999))-BD"
-                                showConfirmedETicket = true
+                                confirmTicket(ticket: ticket, from: fromCity, to: toCity)
                             }) {
                                 Text("Confirm & E-Ticket")
                                     .font(KivorlyTypography.titleSmall)
@@ -1506,5 +1504,73 @@ public struct BangladeshTicketsBookingView: View {
                 }
             }
         }
+    }
+    private func confirmTicket(ticket: TransportTicketItem, from: String, to: String) {
+        let seatsCount = max(1, selectedSeats.count)
+        let totalFare = ticket.price * Double(seatsCount)
+        let pnr = "KV-TICK-\(Int.random(in: 100000...999999))-BD"
+        let seatsArray = selectedSeats.isEmpty ? ["A1"] : Array(selectedSeats).sorted()
+
+        let ticketOrder = SuperAppOrder(
+            id: pnr,
+            service: .tickets,
+            title: "\(ticket.operatorName) (\(seatsArray.joined(separator: ", ")))",
+            subtitle: "\(from) → \(to) • \(ticket.vehicleModel)",
+            timestamp: "Just now",
+            amount: String(format: "\u{09F3}%.0f", totalFare),
+            rawAmount: totalFare,
+            status: .confirmed,
+            etaText: "Departs at \(ticket.departureTime)",
+            pickupLocation: "\(from) Central Counter",
+            destinationLocation: "\(to) Terminal Point",
+            driverOrPartner: OrderPartner(
+                name: ticket.operatorName,
+                role: "Official Transport Partner",
+                rating: 4.8,
+                completedTrips: 24000,
+                phone: "+880 1970-017777",
+                vehicleInfo: "\(ticket.vehicleModel) AC Coach",
+                licensePlate: "Dhaka Metro Ba 15-9922"
+            ),
+            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+            trackingNumber: "PASS-\(pnr)",
+            qrPassCode: "TICKET-\(pnr)-SECURE",
+            bookingDetails: OrderBookingDetails(
+                seats: seatsArray,
+                coachOrFlightClass: ticket.vehicleModel,
+                boardingPoint: "\(from) Terminal Counter",
+                droppingPoint: "\(to) Arrival Point"
+            ),
+            items: seatsArray.map { seat in
+                OrderLineItem(
+                    title: "\(ticket.operatorName) \(ticket.vehicleModel) Seat",
+                    subtitle: "Seat \(seat) • \(from) to \(to)",
+                    quantity: 1,
+                    price: ticket.price,
+                    emoji: "🎫"
+                )
+            },
+            timelineSteps: [
+                OrderTimelineStep(title: "Ticket Purchased", subtitle: "Seats locked & payment received", time: "Just now", isCompleted: true),
+                OrderTimelineStep(title: "E-Pass Issued", subtitle: "Digital Boarding pass generated", time: "Just now", isCompleted: true, isCurrent: true),
+                OrderTimelineStep(title: "Reporting at Counter", subtitle: "Report 30 mins before departure", time: "\(ticket.departureTime) Reporting", isCompleted: false),
+                OrderTimelineStep(title: "Journey Started", subtitle: "Departs on scheduled route", time: ticket.departureTime, isCompleted: false),
+                OrderTimelineStep(title: "Arrived at Destination", subtitle: "Arrival at \(to)", time: ticket.arrivalTime, isCompleted: false)
+            ],
+            paymentBreakdown: OrderPaymentBreakdown(
+                subtotal: totalFare,
+                deliveryOrFareFee: 0,
+                platformFee: 0,
+                discount: 0,
+                total: totalFare,
+                paymentMethod: "bKash",
+                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+            )
+        )
+        OrdersManager.shared.addOrder(ticketOrder)
+
+        selectedTicket = nil
+        confirmedPNR = pnr
+        showConfirmedETicket = true
     }
 }

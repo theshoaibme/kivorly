@@ -15,6 +15,8 @@ public struct HomeDashboardView: View {
     @State private var showNotificationsSheet: Bool = false
     @State private var activeModalService: ServiceType? = nil
     @State private var showUberRideBooking: Bool = false
+    @State private var selectedActiveOrderId: String? = nil
+    @State private var showActiveOrderDetail: Bool = false
 
     public init(onSelectService: @escaping (ServiceType) -> Void) {
         self.onSelectService = onSelectService
@@ -57,11 +59,13 @@ public struct HomeDashboardView: View {
                         }
                     }
 
-                    // 5. Active Order Card
-                    HomeActiveOrderCard(
-                        title: "Burger & Co. • KV-8921",
-                        onDetailsTap: { showNotificationsSheet = true }
-                    )
+                    // 5. Active Order Card (Dynamic live activity bound to OrdersManager)
+                    HomeActiveOrderCard {
+                        if let id = OrdersManager.shared.activeOrders.first?.id {
+                            selectedActiveOrderId = id
+                            showActiveOrderDetail = true
+                        }
+                    }
 
                     // 6. Popular Places
                     HomeRecommendedSection(
@@ -82,6 +86,13 @@ public struct HomeDashboardView: View {
             }
             .fullScreenCover(isPresented: $showUberRideBooking) {
                 UberRideBookingView()
+            }
+            .sheet(isPresented: $showActiveOrderDetail) {
+                if let orderId = selectedActiveOrderId {
+                    OrderDetailView(orderId: orderId) {
+                        showActiveOrderDetail = false
+                    }
+                }
             }
         }
     }
