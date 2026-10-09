@@ -45,7 +45,7 @@ jobs:
         run: |
           xcodebuild build \
             -project "Untitled Project.xcodeproj" \
-            -scheme "MyApp" \
+            -scheme "Kivorly" \
             -destination "generic/platform=iOS Simulator" \
             -derivedDataPath ./build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
@@ -56,7 +56,7 @@ jobs:
         run: |
           xcodebuild archive \
             -project "Untitled Project.xcodeproj" \
-            -scheme "MyApp" \
+            -scheme "Kivorly" \
             -destination "generic/platform=iOS" \
             -archivePath ./build/Kivorly.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
