@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-and-publish:
-    name: Build & Publish Kivorly App
+    name: Build & Publish Kivorly
     runs-on: macos-14
 
     steps:
@@ -41,7 +41,7 @@ jobs:
       - name: Display Xcode Version
         run: xcodebuild -version
 
-      - name: Build App for iOS Simulator
+      - name: Build for iOS Simulator
         run: |
           xcodebuild build \
             -project "Untitled Project.xcodeproj" \
@@ -52,7 +52,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
 
-      - name: Create iOS App Archive
+      - name: Create iOS Archive
         run: |
           xcodebuild archive \
             -project "Untitled Project.xcodeproj" \
@@ -69,17 +69,17 @@ jobs:
           # Zip the full xcarchive
           cd build
           zip -r ../release-artifacts/Kivorly.xcarchive.zip Kivorly.xcarchive
-          # Zip the compiled .app bundle if available in Products
+          # Zip the compiled bundle named Kivorly.zip (no -App suffix)
           if [ -d "Kivorly.xcarchive/Products/Applications" ]; then
             cd Kivorly.xcarchive/Products/Applications
-            zip -r ../../../../release-artifacts/Kivorly-App.zip *
+            zip -r ../../../../release-artifacts/Kivorly.zip *
             cd ../../../..
           fi
 
       - name: Upload Build Artifacts to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
-          name: Kivorly-iOS-Build-${{ github.run_number }}
+          name: Kivorly-${{ github.run_number }}
           path: ./release-artifacts/*
           retention-days: 30
 
@@ -112,7 +112,7 @@ jobs:
             - **Build Number**: `#${{ github.run_number }}`
             
             #### Included Assets:
+            - `Kivorly.zip`: Compiled distribution package.
             - `Kivorly.xcarchive.zip`: Full Xcode Archive for distribution & code signing.
-            - `Kivorly-App.zip`: Compiled Application Bundle.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
