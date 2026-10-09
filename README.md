@@ -31,7 +31,9 @@
 <br>
 
 <details>
-<summary align="center"><h4>📸 View More Service Screenshots (Click to expand)</h4></summary>
+<summary align="center">
+  <img src="https://img.shields.io/badge/📸%20View%20More%20Screenshots-Click%20to%20Expand-007AFF?style=for-the-badge" alt="View More Service Screenshots"/>
+</summary>
 <br>
 
 | Explore Directory | Inter-City Tickets | Express Courier | Brand Shopping |
@@ -63,12 +65,13 @@
 
 ---
 
-## 📦 Releases & Versioning
+## 📦 Releases
 
-Releases follow [Semantic Versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`).
+Push a version tag to build and publish a release:
 
-- **Official Release**: Push a version tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) to trigger automated multi-platform builds and release publication.
-- **Manual Trigger**: Run the workflow manually from GitHub Actions with `publish_release=true` and your target version tag.
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
 
 ---
 
