@@ -40,7 +40,7 @@ public struct OnboardingView: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "square.grid.3x3.topleft.filled",
-            title: "Services in One App",
+            title: "All Services in One Place",
             badge: "",
             illustrationType: .servicesSolarOrbit
         ),

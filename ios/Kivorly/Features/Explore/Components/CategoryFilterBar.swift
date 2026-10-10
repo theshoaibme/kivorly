@@ -22,55 +22,85 @@ public struct CategoryFilterBar: View {
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                // "All Services" Badge
                 Button(action: {
-                    selectedCategory = nil
-                    onSelect?(nil)
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        selectedCategory = nil
+                        onSelect?(nil)
+                    }
                 }) {
                     Text("All Services")
-                        .font(KivorlyTypography.captionBold)
+                        .font(.system(size: 12, weight: .bold))
                         .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(selectedCategory == nil ? Color(uiColor: .tintColor).opacity(0.12) : Color(uiColor: .tertiarySystemFill))
-                        .foregroundColor(selectedCategory == nil ? Color(uiColor: .tintColor) : KivorlyColors.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .padding(.vertical, 7)
+                        .background(
+                            selectedCategory == nil ?
+                            Color(uiColor: .label).opacity(0.1) :
+                            Color(uiColor: .tertiarySystemFill)
+                        )
+                        .foregroundColor(
+                            selectedCategory == nil ?
+                            Color(uiColor: .label) :
+                            Color(uiColor: .secondaryLabel)
+                        )
+                        .clipShape(Capsule())
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(
-                                    selectedCategory == nil ? Color(uiColor: .tintColor) : Color(uiColor: .separator).opacity(0.3),
-                                    lineWidth: selectedCategory == nil ? 2 : 0.6
+                            Capsule()
+                                .strokeBorder(
+                                    selectedCategory == nil ?
+                                    Color(uiColor: .label) :
+                                    Color(uiColor: .separator).opacity(0.4),
+                                    lineWidth: selectedCategory == nil ? 1.5 : 0.8
                                 )
                         )
                 }
+                .buttonStyle(PlainButtonStyle())
 
+                // Service Badges
                 ForEach(ServiceType.allCases) { service in
+                    let isSelected = selectedCategory == service
                     Button(action: {
-                        let newSelection: ServiceType? = (selectedCategory == service ? nil : service)
-                        selectedCategory = newSelection
-                        onSelect?(newSelection)
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            let newSelection: ServiceType? = (isSelected ? nil : service)
+                            selectedCategory = newSelection
+                            onSelect?(newSelection)
+                        }
                     }) {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 5) {
                             Image(systemName: service.systemIcon)
                                 .font(.system(size: 11, weight: .bold))
                                 .symbolRenderingMode(.hierarchical)
                             Text(service.shortTitle)
-                                .font(KivorlyTypography.captionBold)
+                                .font(.system(size: 12, weight: .bold))
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(selectedCategory == service ? service.softBackgroundColor : Color(uiColor: .tertiarySystemFill))
-                        .foregroundColor(selectedCategory == service ? Color(uiColor: .tintColor) : KivorlyColors.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 7)
+                        .background(
+                            isSelected ?
+                            service.accentTint.opacity(0.12) :
+                            Color(uiColor: .tertiarySystemFill)
+                        )
+                        .foregroundColor(
+                            isSelected ?
+                            service.accentTint :
+                            Color(uiColor: .secondaryLabel)
+                        )
+                        .clipShape(Capsule())
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(
-                                    selectedCategory == service ? Color(uiColor: .tintColor) : Color(uiColor: .separator).opacity(0.3),
-                                    lineWidth: selectedCategory == service ? 2 : 0.6
+                            Capsule()
+                                .strokeBorder(
+                                    isSelected ?
+                                    service.accentTint :
+                                    Color(uiColor: .separator).opacity(0.4),
+                                    lineWidth: isSelected ? 1.5 : 0.8
                                 )
                         )
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding(.horizontal, KivorlySpacing.md)
+            .padding(.vertical, 3)
         }
     }
 }

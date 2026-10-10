@@ -173,40 +173,69 @@ public enum ServiceDataProvider {
         case .shopping:
             return [
                 ServiceItemModel(
-                    title: "Wireless ANC Headphones",
-                    category: "Electronics",
-                    priceText: "৳6,500",
-                    numericPrice: 6500.0,
-                    rating: 4.88,
-                    reviewCount: 650,
+                    title: "Royal Silk Embroidered Panjabi",
+                    category: "Aarong Heritage",
+                    priceText: "\u{09F3}3,450",
+                    numericPrice: 3450.0,
+                    rating: 4.92,
+                    reviewCount: 1420,
+                    etaOrDuration: "Express 24h",
+                    icon: "tshirt.fill",
+                    serviceType: .shopping,
+                    badges: ["Official Store", "Nakshi Work"],
+                    imageEmoji: "✨"
+                ),
+                ServiceItemModel(
+                    title: "Slim-Fit Egyptian Cotton Shirt",
+                    category: "Yellow Lifestyle",
+                    priceText: "\u{09F3}2,200",
+                    numericPrice: 2200.0,
+                    rating: 4.86,
+                    reviewCount: 890,
                     etaOrDuration: "Next Day",
-                    icon: "headphones",
+                    icon: "tshirt.fill",
                     serviceType: .shopping,
-                    badges: ["Official Store", "Warranty"]
+                    badges: ["100% Cotton", "Best Seller"],
+                    imageEmoji: "👔"
                 ),
                 ServiceItemModel(
-                    title: "Minimalist Leather Backpack",
-                    category: "Fashion & Lifestyle",
-                    priceText: "৳2,800",
-                    numericPrice: 2800.0,
-                    rating: 4.82,
-                    reviewCount: 310,
-                    etaOrDuration: "2 Days",
-                    icon: "bag.fill",
+                    title: "Xiaomi Redmi Note 13 Pro 5G",
+                    category: "Xiaomi BD Official",
+                    priceText: "\u{09F3}29,999",
+                    numericPrice: 29999.0,
+                    rating: 4.95,
+                    reviewCount: 2150,
+                    etaOrDuration: "Express Same-Day",
+                    icon: "iphone",
                     serviceType: .shopping,
-                    badges: ["Handmade"]
+                    badges: ["BTRC Approved", "Official Warranty"],
+                    imageEmoji: "📱"
                 ),
                 ServiceItemModel(
-                    title: "Smart Fitness Watch Ultra",
-                    category: "Wearables",
-                    priceText: "৳8,900",
-                    numericPrice: 8900.0,
-                    rating: 4.94,
-                    reviewCount: 1200,
-                    etaOrDuration: "Express 4h",
-                    icon: "applewatch",
+                    title: "Genuine Full-Grain Leather Oxford",
+                    category: "Apex Formal",
+                    priceText: "\u{09F3}4,800",
+                    numericPrice: 4800.0,
+                    rating: 4.89,
+                    reviewCount: 640,
+                    etaOrDuration: "Next Day",
+                    icon: "shoeprints.fill",
                     serviceType: .shopping,
-                    badges: ["New Release"]
+                    badges: ["Full Grain", "Comfort Foam"],
+                    imageEmoji: "👞"
+                ),
+                ServiceItemModel(
+                    title: "Walton Primo 4K Smart TV 43\"",
+                    category: "Walton Hi-Tech",
+                    priceText: "\u{09F3}34,500",
+                    numericPrice: 34500.0,
+                    rating: 4.88,
+                    reviewCount: 920,
+                    etaOrDuration: "Scheduled 24h",
+                    icon: "tv.fill",
+                    serviceType: .shopping,
+                    badges: ["4K HDR", "5-Yr Warranty"],
+                    imageEmoji: "📺"
                 )
             ]
 

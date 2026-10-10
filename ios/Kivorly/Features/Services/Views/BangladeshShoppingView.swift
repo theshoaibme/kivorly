@@ -10,6 +10,7 @@
 
 import SwiftUI
 import UIKit
+import Combine
 
 public struct ShoppingProductItem: Identifiable {
     public let id: String
@@ -39,6 +40,25 @@ public struct ShoppingCartItem: Identifiable {
     public var selectedSize: String
     public var selectedColor: String
     public var quantity: Int
+}
+
+public enum ShoppingSortOption: String, CaseIterable, Identifiable {
+    case featured = "Featured"
+    case priceLowToHigh = "Price: Low to High"
+    case priceHighToLow = "Price: High to Low"
+    case topRated = "Top Rated"
+    case biggestSavings = "Biggest Savings"
+
+    public var id: String { rawValue }
+    public var icon: String {
+        switch self {
+        case .featured: return "sparkles"
+        case .priceLowToHigh: return "arrow.up"
+        case .priceHighToLow: return "arrow.down"
+        case .topRated: return "star.fill"
+        case .biggestSavings: return "percent"
+        }
+    }
 }
 
 // MARK: - Reusable Real Product Image Component
@@ -118,7 +138,18 @@ public struct BangladeshShoppingView: View {
     // Checkout & Confirmation
     @State private var showOrderConfirmation: Bool = false
     @State private var confirmedOrderId: String = ""
-    @State private var selectedPaymentMethod: String = "bKash"
+        @State private var selectedSortOption: ShoppingSortOption = .featured
+    @State private var wishlistProductIds: Set<String> = ["sp-1", "sp-4", "sp-8"]
+    @State private var showWishlistOnly: Bool = false
+    @State private var countdownSeconds: Int = 14850
+    private let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    @State private var promoCodeInput: String = ""
+    @State private var appliedPromo: String? = "KIVEID"
+    @State private var promoDiscountAmount: Double = 300.0
+    @State private var isOutsideDhaka: Bool = false
+    @State private var placedShoppingOrder: SuperAppOrder? = nil
+    @State private var showTrackLiveSheet: Bool = false
+@State private var selectedPaymentMethod: String = "bKash"
 
     private let categories = [
         "All", "Ethnic & Panjabi", "Casual Wear", "Women's Fashion", "Footwear", "Smartphones & Tech", "Electronics & Home", "Home Living", "Beauty & Care"
@@ -551,15 +582,36 @@ public struct BangladeshShoppingView: View {
         )
     ]
 
+    private var countdownFormatted: String {
+        let hours = countdownSeconds / 3600
+        let minutes = (countdownSeconds % 3600) / 60
+        let seconds = countdownSeconds % 60
+        return String(format: "%02dh : %02dm : %02ds", hours, minutes, seconds)
+    }
+
     private var filteredProducts: [ShoppingProductItem] {
-        catalogProducts.filter { item in
+        let base = catalogProducts.filter { item in
             let matchesCategory = (selectedCategory == "All" || item.category == selectedCategory)
             let matchesBrand = (selectedBrand == "All" || item.brand == selectedBrand)
+            let matchesWishlist = !showWishlistOnly || wishlistProductIds.contains(item.id)
             let matchesSearch = searchQuery.isEmpty ||
                 item.title.localizedCaseInsensitiveContains(searchQuery) ||
                 item.brand.localizedCaseInsensitiveContains(searchQuery) ||
                 item.category.localizedCaseInsensitiveContains(searchQuery)
-            return matchesCategory && matchesBrand && matchesSearch
+            return matchesCategory && matchesBrand && matchesWishlist && matchesSearch
+        }
+
+        switch selectedSortOption {
+        case .featured:
+            return base
+        case .priceLowToHigh:
+            return base.sorted { $0.discountPrice < $1.discountPrice }
+        case .priceHighToLow:
+            return base.sorted { $0.discountPrice > $1.discountPrice }
+        case .topRated:
+            return base.sorted { $0.rating > $1.rating }
+        case .biggestSavings:
+            return base.sorted { ($0.originalPrice - $0.discountPrice) > ($1.originalPrice - $1.discountPrice) }
         }
     }
 
@@ -596,6 +648,9 @@ public struct BangladeshShoppingView: View {
                     // Category Filter Pills
                     categoryFilterBar
 
+                    // Sorting & Wishlist Sub-Bar
+                    sortAndFilterSubBar
+
                     // Clean 2-Column Product Grid
                     productGridSection
                 }
@@ -619,6 +674,9 @@ public struct BangladeshShoppingView: View {
         }
         .sheet(isPresented: $showOrderConfirmation) {
             orderSuccessModal
+        }
+        .sheet(isPresented: $showTrackLiveSheet) {
+            OrderDetailView(orderId: confirmedOrderId)
         }
     }
 
@@ -759,46 +817,50 @@ public struct BangladeshShoppingView: View {
 
     // MARK: - Festival Sale Banner
     private var festivalSaleBanner: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text("🔥 Mega Festival Sale")
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.25))
-                        .clipShape(Capsule())
-
-                    Text("Up to 40% off")
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("FESTIVAL SALE")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(ServiceType.shopping.accentTint)
+
+                    Text("Official Brand Stores")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(Color(uiColor: .label))
+
+                    Text("Up to 40% off • Code KIVEID for \u{09F3}300 off")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color(uiColor: .secondaryLabel))
                 }
 
-                Text("Aarong, Yellow, Xiaomi & More")
-                    .font(.system(size: 15, weight: .black))
-                    .foregroundColor(.white)
+                Spacer()
 
-                Text("Use Code: KIVEID for extra ৳300 discount")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.85))
+                Text("🛍️")
+                    .font(.system(size: 28))
             }
 
-            Spacer()
+            HStack(spacing: 6) {
+                Text("Flash Deals End:")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Color(uiColor: .secondaryLabel))
 
-            Text("🛍️")
-                .font(.system(size: 42))
+                Text(countdownFormatted)
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundColor(ServiceType.shopping.accentTint)
+
+                Spacer()
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color(uiColor: .tertiarySystemFill))
+            .clipShape(Capsule())
         }
         .padding(14)
-        .background(
-            LinearGradient(
-                colors: [Color(red: 0x93 / 255.0, green: 0x33 / 255.0, blue: 0xEA / 255.0), Color(red: 0xC0 / 255.0, green: 0x26 / 255.0, blue: 0xD3 / 255.0)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: Color.purple.opacity(0.25), radius: 8, y: 3)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .onReceive(countdownTimer) { _ in
+            if countdownSeconds > 0 { countdownSeconds -= 1 }
+        }
     }
 
     // MARK: - Brand Stores Filter Bar
@@ -888,6 +950,69 @@ public struct BangladeshShoppingView: View {
         }
     }
 
+    // MARK: - Sorting & Wishlist Sub-Bar
+    private var sortAndFilterSubBar: some View {
+        HStack {
+            // Wishlist Toggle Pill
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    showWishlistOnly.toggle()
+                }
+            }) {
+                HStack(spacing: 4) {
+                    Image(systemName: showWishlistOnly ? "heart.fill" : "heart")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(showWishlistOnly ? .white : .red)
+                    Text("Saved (\(wishlistProductIds.count))")
+                        .font(.system(size: 11, weight: .bold))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(showWishlistOnly ? Color.red : Color(uiColor: .secondarySystemGroupedBackground))
+                .foregroundColor(showWishlistOnly ? .white : Color(uiColor: .label))
+                .clipShape(Capsule())
+                .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            Spacer()
+
+            Text("\(filteredProducts.count) items")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Color(uiColor: .secondaryLabel))
+
+            // Sort Menu
+            Menu {
+                ForEach(ShoppingSortOption.allCases) { opt in
+                    Button(action: { selectedSortOption = opt }) {
+                        HStack {
+                            Text(opt.rawValue)
+                            if selectedSortOption == opt {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: selectedSortOption.icon)
+                        .font(.system(size: 10, weight: .bold))
+                    Text(selectedSortOption.rawValue)
+                        .font(.system(size: 11, weight: .bold))
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 9, weight: .bold))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .foregroundColor(ServiceType.shopping.accentTint)
+                .clipShape(Capsule())
+                .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
     // MARK: - Product Grid (Clean 2-Column UI)
     private var productGridSection: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
@@ -925,6 +1050,33 @@ public struct BangladeshShoppingView: View {
                         .background(Color.red)
                         .clipShape(Capsule())
                         .padding(8)
+
+                    // Wishlist Heart Button (Top-Right)
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                if wishlistProductIds.contains(product.id) {
+                                    wishlistProductIds.remove(product.id)
+                                } else {
+                                    wishlistProductIds.insert(product.id)
+                                }
+                            }
+                        }) {
+                            Circle()
+                                .fill(Color.black.opacity(0.35))
+                                .frame(width: 28, height: 28)
+                                .overlay(
+                                    Image(systemName: wishlistProductIds.contains(product.id) ? "heart.fill" : "heart")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(wishlistProductIds.contains(product.id) ? .red : .white)
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(8)
+                    }
                 }
 
                 // Brand & Title
@@ -1012,39 +1164,34 @@ public struct BangladeshShoppingView: View {
     // MARK: - Floating Bottom Cart Drawer
     private var floatingCartBar: some View {
         HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(cartItemCount) \(cartItemCount == 1 ? "Item" : "Items") in Bag")
-                    .font(.system(size: 11, weight: .semibold))
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(cartItemCount) \(cartItemCount == 1 ? "item" : "items")")
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.85))
 
-                Text("৳\(Int(cartTotal))")
-                    .font(.system(size: 19, weight: .black))
+                Text("\u{09F3}\(Int(cartTotal))")
+                    .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
             }
 
             Spacer()
 
             Button(action: { showCartSheet = true }) {
-                HStack(spacing: 6) {
-                    Text("View Bag & Checkout")
-                        .font(.system(size: 13, weight: .bold))
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 11, weight: .bold))
-                }
-                .foregroundColor(ServiceType.shopping.accentTint)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(Color.white)
-                .clipShape(Capsule())
+                Text("View Bag")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(ServiceType.shopping.accentTint)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 9)
+                    .background(Color.white)
+                    .clipShape(Capsule())
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .background(ServiceType.shopping.accentTint)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .padding(.horizontal, KivorlySpacing.md)
         .padding(.bottom, 8)
-        .shadow(color: ServiceType.shopping.accentTint.opacity(0.35), radius: 10, y: 4)
     }
 
     // MARK: - Product Detail Sheet
@@ -1221,16 +1368,13 @@ public struct BangladeshShoppingView: View {
                             addToCart(product: product, size: detailSelectedSize, color: detailSelectedColor, qty: detailQuantity)
                             selectedProduct = nil
                         }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "bag.badge.plus")
-                                Text("Add to Bag")
-                            }
-                            .font(.system(size: 14, weight: .bold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color(uiColor: .secondarySystemFill))
-                            .foregroundColor(Color(uiColor: .label))
-                            .clipShape(Capsule())
+                            Text("Add to Bag")
+                                .font(.system(size: 14, weight: .bold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color(uiColor: .secondarySystemFill))
+                                .foregroundColor(Color(uiColor: .label))
+                                .clipShape(Capsule())
                         }
 
                         Button(action: {
@@ -1238,17 +1382,13 @@ public struct BangladeshShoppingView: View {
                             selectedProduct = nil
                             showCartSheet = true
                         }) {
-                            HStack(spacing: 6) {
-                                Text("Buy Now")
-                                Image(systemName: "arrow.right")
-                            }
-                            .font(.system(size: 14, weight: .bold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(ServiceType.shopping.accentTint)
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                            .shadow(color: ServiceType.shopping.accentTint.opacity(0.3), radius: 6, y: 2)
+                            Text("Buy Now")
+                                .font(.system(size: 14, weight: .bold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(ServiceType.shopping.accentTint)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
                         }
                     }
                     .padding(.top, 8)
@@ -1272,13 +1412,13 @@ public struct BangladeshShoppingView: View {
                 if cartItems.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "bag")
-                            .font(.system(size: 54))
+                            .font(.system(size: 48))
                             .foregroundColor(Color(uiColor: .tertiaryLabel))
-                        Text("Your Shopping Bag is Empty")
-                            .font(KivorlyTypography.titleMedium)
+                        Text("Bag is Empty")
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
-                        Text("Explore Aarong, Yellow, Xiaomi & more official stores!")
-                            .font(KivorlyTypography.caption)
+                        Text("Add items to get started.")
+                            .font(.system(size: 13, weight: .regular))
                             .foregroundColor(Color(uiColor: .secondaryLabel))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -1286,7 +1426,7 @@ public struct BangladeshShoppingView: View {
                     ScrollView {
                         VStack(spacing: 14) {
                             // Items List
-                            VStack(spacing: 10) {
+                            VStack(spacing: 8) {
                                 ForEach(cartItems.indices, id: \.self) { idx in
                                     let item = cartItems[idx]
                                     HStack(spacing: 12) {
@@ -1295,23 +1435,23 @@ public struct BangladeshShoppingView: View {
                                             imageUrl: item.product.imageUrl,
                                             emojiFallback: item.product.emoji,
                                             height: 48,
-                                            cornerRadius: 10,
+                                            cornerRadius: 8,
                                             contentMode: .fill
                                         )
                                         .frame(width: 48, height: 48)
 
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(item.product.title)
-                                                .font(.system(size: 13, weight: .bold))
+                                                .font(.system(size: 13, weight: .semibold))
                                                 .foregroundColor(Color(uiColor: .label))
                                                 .lineLimit(1)
 
-                                            Text("\(item.selectedColor) • Size \(item.selectedSize)")
-                                                .font(.system(size: 11))
+                                            Text("\(item.selectedColor) • \(item.selectedSize)")
+                                                .font(.system(size: 11, weight: .regular))
                                                 .foregroundColor(Color(uiColor: .secondaryLabel))
 
-                                            Text("৳\(Int(item.product.discountPrice))")
-                                                .font(.system(size: 13, weight: .black))
+                                            Text("\u{09F3}\(Int(item.product.discountPrice))")
+                                                .font(.system(size: 13, weight: .bold))
                                                 .foregroundColor(ServiceType.shopping.accentTint)
                                         }
 
@@ -1333,7 +1473,7 @@ public struct BangladeshShoppingView: View {
 
                                             Text("\(item.quantity)")
                                                 .font(.system(size: 13, weight: .bold))
-                                                .frame(minWidth: 18)
+                                                .frame(minWidth: 16)
 
                                             Button(action: {
                                                 cartItems[idx].quantity += 1
@@ -1346,37 +1486,144 @@ public struct BangladeshShoppingView: View {
                                     }
                                     .padding(10)
                                     .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                    .cornerRadius(12)
+                                    .cornerRadius(10)
                                 }
                             }
 
-                            // Delivery Address Card
+                            // Delivery Address
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Delivery Address")
-                                    .font(.system(size: 10, weight: .black))
+                                    .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(Color(uiColor: .secondaryLabel))
 
                                 HStack {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("MD Shoaib Khan • +880 1712-345678")
-                                            .font(.system(size: 13, weight: .bold))
-                                        Text("Road 71, House 14, Flat 4B, Gulshan 2, Dhaka")
-                                            .font(.system(size: 11))
+                                        Text("MD Shoaib Khan")
+                                            .font(.system(size: 13, weight: .semibold))
+                                        Text("Gulshan 2, Dhaka • Road 71, House 14")
+                                            .font(.system(size: 11, weight: .regular))
                                             .foregroundColor(Color(uiColor: .secondaryLabel))
                                     }
                                     Spacer()
                                     Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 14))
                                         .foregroundColor(.green)
                                 }
                                 .padding(10)
                                 .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                .cornerRadius(12)
+                                .cornerRadius(10)
+                            }
+
+                            // Delivery Region
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Delivery Speed")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(Color(uiColor: .secondaryLabel))
+
+                                HStack(spacing: 8) {
+                                    Button(action: { isOutsideDhaka = false }) {
+                                        Text("Dhaka (\u{09F3}60 • 24h)")
+                                            .font(.system(size: 12, weight: !isOutsideDhaka ? .bold : .medium))
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 8)
+                                            .background(!isOutsideDhaka ? ServiceType.shopping.accentTint.opacity(0.12) : Color(uiColor: .secondarySystemGroupedBackground))
+                                            .foregroundColor(!isOutsideDhaka ? ServiceType.shopping.accentTint : Color(uiColor: .label))
+                                            .cornerRadius(8)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+
+                                    Button(action: { isOutsideDhaka = true }) {
+                                        Text("Outside Dhaka (\u{09F3}120 • 48h)")
+                                            .font(.system(size: 12, weight: isOutsideDhaka ? .bold : .medium))
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 8)
+                                            .background(isOutsideDhaka ? ServiceType.shopping.accentTint.opacity(0.12) : Color(uiColor: .secondarySystemGroupedBackground))
+                                            .foregroundColor(isOutsideDhaka ? ServiceType.shopping.accentTint : Color(uiColor: .label))
+                                            .cornerRadius(8)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+
+                            // Free Delivery Progress
+                            let threshold: Double = 1500.0
+                            let progress = min(1.0, cartTotal / threshold)
+                            VStack(alignment: .leading, spacing: 5) {
+                                HStack {
+                                    Text(cartTotal >= threshold ? "Free delivery unlocked" : "Add \u{09F3}\(Int(max(0, threshold - cartTotal))) for free delivery")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(cartTotal >= threshold ? .green : Color(uiColor: .secondaryLabel))
+                                    Spacer()
+                                }
+                                GeometryReader { geo in
+                                    ZStack(alignment: .leading) {
+                                        Capsule()
+                                            .fill(Color(uiColor: .tertiarySystemFill))
+                                            .frame(height: 4)
+                                        Capsule()
+                                            .fill(cartTotal >= threshold ? Color.green : ServiceType.shopping.accentTint)
+                                            .frame(width: geo.size.width * CGFloat(progress), height: 4)
+                                    }
+                                }
+                                .frame(height: 4)
+                            }
+                            .padding(10)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+
+                            // Promo Voucher
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Voucher")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(Color(uiColor: .secondaryLabel))
+
+                                HStack(spacing: 8) {
+                                    TextField("Enter promo (e.g. KIVEID)", text: $promoCodeInput)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .textInputAutocapitalization(.characters)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 8)
+                                        .background(Color(uiColor: .tertiarySystemFill))
+                                        .cornerRadius(8)
+
+                                    Button(action: { applyPromoCode() }) {
+                                        Text("Apply")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 8)
+                                            .background(ServiceType.shopping.accentTint)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(8)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+
+                                if let promo = appliedPromo {
+                                    HStack(spacing: 6) {
+                                        Text("Voucher \(promo) applied (-\u{09F3}\(Int(promoDiscountAmount)))")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundColor(.green)
+                                        Spacer()
+                                        Button(action: {
+                                            appliedPromo = nil
+                                            promoDiscountAmount = 0
+                                        }) {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .font(.system(size: 12))
+                                                .foregroundColor(Color(uiColor: .tertiaryLabel))
+                                        }
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.green.opacity(0.12))
+                                    .cornerRadius(6)
+                                }
                             }
 
                             // Payment Method
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Payment Method")
-                                    .font(.system(size: 10, weight: .black))
+                                Text("Payment")
+                                    .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(Color(uiColor: .secondaryLabel))
 
                                 HStack(spacing: 8) {
@@ -1386,126 +1633,76 @@ public struct BangladeshShoppingView: View {
                                     paymentPill(title: "Nagad", isSelected: selectedPaymentMethod == "Nagad") {
                                         selectedPaymentMethod = "Nagad"
                                     }
-                                    paymentPill(title: "Cash on Delivery", isSelected: selectedPaymentMethod == "COD") {
+                                    paymentPill(title: "COD", isSelected: selectedPaymentMethod == "COD") {
                                         selectedPaymentMethod = "COD"
                                     }
                                 }
                             }
 
                             // Cost Breakdown
+                            let currentDeliveryFee: Double = isOutsideDhaka ? 120.0 : (cartTotal >= 1500 ? 0.0 : 60.0)
+                            let netTotal = max(0, cartTotal + currentDeliveryFee - promoDiscountAmount)
+
                             VStack(spacing: 6) {
                                 HStack {
-                                    Text("Bag Subtotal")
+                                    Text("Subtotal")
                                         .foregroundColor(Color(uiColor: .secondaryLabel))
                                     Spacer()
-                                    Text("৳\(Int(cartTotal))")
+                                    Text("\u{09F3}\(Int(cartTotal))")
                                         .fontWeight(.semibold)
                                 }
                                 HStack {
-                                    Text("Express Delivery (Dhaka)")
+                                    Text(isOutsideDhaka ? "Delivery (Nationwide)" : "Delivery (Dhaka)")
                                         .foregroundColor(Color(uiColor: .secondaryLabel))
                                     Spacer()
-                                    Text(cartTotal >= 1500 ? "Free" : "৳60")
-                                        .fontWeight(.bold)
-                                        .foregroundColor(cartTotal >= 1500 ? .green : Color(uiColor: .label))
+                                    Text(currentDeliveryFee == 0 ? "Free" : "\u{09F3}\(Int(currentDeliveryFee))")
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(currentDeliveryFee == 0 ? .green : Color(uiColor: .label))
+                                }
+                                if promoDiscountAmount > 0 {
+                                    HStack {
+                                        Text("Discount")
+                                            .foregroundColor(.green)
+                                        Spacer()
+                                        Text("-\u{09F3}\(Int(promoDiscountAmount))")
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.green)
+                                    }
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Total Payable")
-                                        .font(.system(size: 15, weight: .bold))
+                                    Text("Total")
+                                        .font(.system(size: 14, weight: .bold))
                                     Spacer()
-                                    Text("৳\(Int(cartTotal + (cartTotal >= 1500 ? 0 : 60)))")
-                                        .font(.system(size: 18, weight: .black))
+                                    Text("\u{09F3}\(Int(netTotal))")
+                                        .font(.system(size: 16, weight: .bold))
                                         .foregroundColor(ServiceType.shopping.accentTint)
                                 }
                             }
                             .font(.system(size: 12))
                             .padding(12)
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .cornerRadius(12)
+                            .cornerRadius(10)
                         }
                         .padding(16)
                     }
 
-                    // Checkout Button
+                    // Bottom Checkout Button (No Icon, No Shadow, No Gradient)
+                    let currentDeliveryFee: Double = isOutsideDhaka ? 120.0 : (cartTotal >= 1500 ? 0.0 : 60.0)
+                    let netTotal = max(0, cartTotal + currentDeliveryFee - promoDiscountAmount)
+
                     Button(action: {
-                        let generatedOrderId = "KVS-\(Int.random(in: 100000...999999))-BD"
-                        let deliveryFee = cartTotal >= 1500 ? 0.0 : 60.0
-                        let totalAmt = cartTotal + deliveryFee
-
-                        let lineItems = cartItems.map { ci in
-                            OrderLineItem(
-                                title: ci.product.title,
-                                subtitle: "\(ci.selectedColor) • Size \(ci.selectedSize)",
-                                quantity: ci.quantity,
-                                price: ci.product.discountPrice,
-                                imageAssetName: ci.product.imageAssetName,
-                                emoji: ci.product.emoji
-                            )
-                        }
-
-                        let shoppingOrder = SuperAppOrder(
-                            id: generatedOrderId,
-                            service: .shopping,
-                            title: cartItems.first?.product.brand ?? "Kivorly Mall",
-                            subtitle: "\(cartItems.count) item(s) • \(cartItems.first?.product.title ?? "")",
-                            timestamp: "Just now",
-                            amount: String(format: "\u{09F3}%.0f", totalAmt),
-                            rawAmount: totalAmt,
-                            status: .inProgress,
-                            etaText: "Delivery by Tomorrow, 4:00 PM",
-                            pickupLocation: "Kivorly Mall Central Hub, Tejgaon, Dhaka",
-                            destinationLocation: "Road 71, House 14, Flat 4B, Gulshan 2, Dhaka",
-                            driverOrPartner: OrderPartner(
-                                name: "Steadfast Express Delivery",
-                                role: "Official Courier Hub",
-                                rating: 4.9,
-                                completedTrips: 15400,
-                                phone: "+880 9612-004488",
-                                vehicleInfo: "Delivery Van • Dhaka Metro Da 12-4011"
-                            ),
-                            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
-                            trackingNumber: "STEADFAST-BD-\(Int.random(in: 100000...999999))",
-                            qrPassCode: nil,
-                            bookingDetails: nil,
-                            items: lineItems,
-                            timelineSteps: [
-                                OrderTimelineStep(title: "Order Placed", subtitle: "Payment confirmed via \(selectedPaymentMethod)", time: "Just now", isCompleted: true),
-                                OrderTimelineStep(title: "Confirmed by Merchant", subtitle: "Official seller packing order", time: "Just now", isCompleted: true, isCurrent: true),
-                                OrderTimelineStep(title: "Dispatched from Tejgaon Hub", subtitle: "Assigned to Steadfast Express", time: "Pending", isCompleted: false),
-                                OrderTimelineStep(title: "Out for Delivery", subtitle: "Courier will call before arrival", time: "Tomorrow 02:00 PM", isCompleted: false),
-                                OrderTimelineStep(title: "Delivered & Verified", subtitle: "Delivery to Gulshan 2", time: "Tomorrow 04:00 PM", isCompleted: false)
-                            ],
-                            paymentBreakdown: OrderPaymentBreakdown(
-                                subtotal: cartTotal,
-                                deliveryOrFareFee: deliveryFee,
-                                platformFee: 0,
-                                discount: 0,
-                                total: totalAmt,
-                                paymentMethod: selectedPaymentMethod,
-                                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
-                            )
-                        )
-                        OrdersManager.shared.addOrder(shoppingOrder)
-
-                        confirmedOrderId = generatedOrderId
-                        cartItems.removeAll()
-                        showCartSheet = false
-                        showOrderConfirmation = true
+                        processCheckout()
                     }) {
-                        HStack(spacing: 6) {
-                            Text("Place Order")
-                                .font(KivorlyTypography.titleSmall)
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 13, weight: .bold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(ServiceType.shopping.accentTint)
-                        .clipShape(Capsule())
-                        .shadow(color: ServiceType.shopping.accentTint.opacity(0.3), radius: 6, y: 2)
+                        Text("Checkout • \u{09F3}\(Int(netTotal))")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(ServiceType.shopping.accentTint)
+                            .clipShape(Capsule())
                     }
+                    .buttonStyle(PlainButtonStyle())
                     .padding(16)
                     .background(Color(uiColor: .secondarySystemGroupedBackground))
                 }
@@ -1519,7 +1716,6 @@ public struct BangladeshShoppingView: View {
             }
         }
     }
-
     private func paymentPill(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
@@ -1571,21 +1767,134 @@ public struct BangladeshShoppingView: View {
                         .padding(.horizontal, 24)
                 }
 
+                // Courier Fulfilled Pill
+                HStack(spacing: 8) {
+                    Image(systemName: "shippingbox.fill")
+                        .foregroundColor(ServiceType.shopping.accentTint)
+                    Text("Fulfilled by Steadfast Express Delivery Hub")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color(uiColor: .secondaryLabel))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .clipShape(Capsule())
+
                 Spacer()
 
-                Button(action: { showOrderConfirmation = false }) {
-                    Text("Continue Shopping")
+                VStack(spacing: 12) {
+                    Button(action: {
+                        showOrderConfirmation = false
+                        showTrackLiveSheet = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "location.fill")
+                            Text("Track Order Live")
+                        }
                         .font(KivorlyTypography.titleSmall)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(ServiceType.shopping.accentTint)
                         .clipShape(Capsule())
+                    }
+
+                    Button(action: { showOrderConfirmation = false }) {
+                        Text("Continue Shopping")
+                            .font(KivorlyTypography.titleSmall)
+                            .foregroundColor(Color(uiColor: .label))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color(uiColor: .secondarySystemFill))
+                            .clipShape(Capsule())
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
             .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         }
+    }
+
+    private func applyPromoCode() {
+        let code = promoCodeInput.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if code == "KIVEID" {
+            appliedPromo = "KIVEID"
+            promoDiscountAmount = 300.0
+            promoCodeInput = ""
+        } else if code == "DHAKA50" {
+            appliedPromo = "DHAKA50"
+            promoDiscountAmount = 150.0
+            promoCodeInput = ""
+        } else if code == "FREESHIP" {
+            appliedPromo = "FREESHIP"
+            promoDiscountAmount = isOutsideDhaka ? 120.0 : 60.0
+            promoCodeInput = ""
+        }
+    }
+
+    private func processCheckout() {
+        let generatedOrderId = "KVS-\(Int.random(in: 100000...999999))-BD"
+        let deliveryFee: Double = isOutsideDhaka ? 120.0 : (cartTotal >= 1500 ? 0.0 : 60.0)
+        let totalAmt = max(0, cartTotal + deliveryFee - promoDiscountAmount)
+        let lineItems = cartItems.map { item in
+            OrderLineItem(
+                title: item.product.title,
+                subtitle: "\(item.selectedColor) • Size \(item.selectedSize)",
+                quantity: item.quantity,
+                price: item.product.discountPrice,
+                emoji: item.product.emoji
+            )
+        }
+
+        let shoppingOrder = SuperAppOrder(
+            id: generatedOrderId,
+            service: .shopping,
+            title: cartItems.first?.product.brand ?? "Kivorly Mall",
+            subtitle: "\(cartItems.count) item(s) • \(cartItems.first?.product.title ?? "")",
+            timestamp: "Just now",
+            amount: String(format: "\u{09F3}%.0f", totalAmt),
+            rawAmount: totalAmt,
+            status: .inProgress,
+            etaText: isOutsideDhaka ? "Delivery in 48h (Nationwide)" : "Delivery by Tomorrow, 4:00 PM",
+            pickupLocation: "Kivorly Mall Central Hub, Tejgaon, Dhaka",
+            destinationLocation: isOutsideDhaka ? "GEC Circle, Nasirabad, Chittagong" : "Road 71, House 14, Flat 4B, Gulshan 2, Dhaka",
+            driverOrPartner: OrderPartner(
+                name: "Steadfast Express Delivery",
+                role: "Official Courier Hub",
+                rating: 4.9,
+                completedTrips: 15400,
+                phone: "+880 9612-004488",
+                vehicleInfo: "Delivery Van • Dhaka Metro Da 12-4011"
+            ),
+            securityPin: String(format: "%04d", Int.random(in: 1000...9999)),
+            trackingNumber: "STEADFAST-BD-\(Int.random(in: 100000...999999))",
+            qrPassCode: nil,
+            bookingDetails: nil,
+            items: lineItems,
+            timelineSteps: [
+                OrderTimelineStep(title: "Order Placed", subtitle: "Payment confirmed via \(selectedPaymentMethod)", time: "Just now", isCompleted: true),
+                OrderTimelineStep(title: "Confirmed by Merchant", subtitle: "Official seller packing order", time: "Just now", isCompleted: true, isCurrent: true),
+                OrderTimelineStep(title: "Dispatched from Tejgaon Hub", subtitle: "Assigned to Steadfast Express", time: "Pending", isCompleted: false),
+                OrderTimelineStep(title: "Out for Delivery", subtitle: "Courier will call before arrival", time: "Tomorrow 02:00 PM", isCompleted: false),
+                OrderTimelineStep(title: "Delivered & Verified", subtitle: isOutsideDhaka ? "Delivery to Chittagong" : "Delivery to Gulshan 2", time: "Tomorrow 04:00 PM", isCompleted: false)
+            ],
+            paymentBreakdown: OrderPaymentBreakdown(
+                subtotal: cartTotal,
+                deliveryOrFareFee: deliveryFee,
+                platformFee: 0,
+                discount: promoDiscountAmount,
+                total: totalAmt,
+                paymentMethod: selectedPaymentMethod,
+                transactionId: "TXN-\(Int.random(in: 10000000...99999999))"
+            )
+        )
+        OrdersManager.shared.addOrder(shoppingOrder)
+
+        placedShoppingOrder = shoppingOrder
+        confirmedOrderId = generatedOrderId
+        cartItems.removeAll()
+        showCartSheet = false
+        showOrderConfirmation = true
     }
 }
