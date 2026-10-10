@@ -60,15 +60,35 @@ public struct ServiceCheckoutModal: View {
                 // Item Header Banner
                 KivorlyCard(padding: KivorlySpacing.md) {
                     HStack(spacing: KivorlySpacing.md) {
-                        ZStack {
-                            Circle()
-                                .fill(item.serviceType.accentTint.opacity(0.15))
+                        if let asset = item.imageAssetName, !asset.isEmpty, let uiImage = UIImage(named: asset) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(width: 56, height: 56)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(Color(uiColor: .separator).opacity(0.2), lineWidth: 0.8)
+                                )
+                        } else if item.serviceType == .foodDelivery {
+                            Image("hero_food_kacchi")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 56, height: 56)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        } else {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(item.serviceType.accentTint.opacity(0.15))
+                                    .frame(width: 56, height: 56)
 
-                            Image(systemName: item.icon)
-                                .font(.system(size: 24, weight: .bold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundColor(item.serviceType.accentTint)
+                                Image(systemName: item.icon)
+                                    .font(.system(size: 24, weight: .bold))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundColor(item.serviceType.accentTint)
+                            }
                         }
 
                         VStack(alignment: .leading, spacing: 3) {

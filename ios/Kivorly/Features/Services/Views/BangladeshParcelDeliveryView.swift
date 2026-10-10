@@ -109,6 +109,33 @@ public struct BangladeshParcelDeliveryView: View {
     @State private var activeTrackingNumber: String = "KVP-892401-BD"
     @State private var isBookingSuccessAlert: Bool = false
 
+    private let parcelPromoSlides: [ServicePromoSlide] = [
+        ServicePromoSlide(
+            id: "par-slide-1",
+            tag: "EXPRESS PICKUP",
+            title: "30-Minute Doorstep Collection",
+            subtitle: "Riders dispatched immediately for documents & fragile packages in Dhaka.",
+            actionTitle: "Send Now",
+            imageAssetName: "hero_parcel_pickup"
+        ),
+        ServicePromoSlide(
+            id: "par-slide-2",
+            tag: "64 DISTRICTS",
+            title: "Nationwide Hub Delivery",
+            subtitle: "Guaranteed 48-72h doorstep delivery across all divisions with live GPS.",
+            actionTitle: "Explore Rates",
+            imageAssetName: "hero_parcel_nationwide"
+        ),
+        ServicePromoSlide(
+            id: "par-slide-3",
+            tag: "MERCHANT COD",
+            title: "Instant Cash On Delivery Payout",
+            subtitle: "Automated next-day bKash and bank settlement for e-commerce sellers.",
+            actionTitle: "Register Store",
+            imageAssetName: "hero_parcel_cod"
+        )
+    ]
+
     private let dhakaPickupHubs = [
         "Gulshan 2, Dhaka", "Banani, Dhaka", "Dhanmondi, Dhaka", "Uttara Sector 4, Dhaka",
         "Mohakhali DOHS, Dhaka", "Bashundhara R/A, Dhaka", "Mirpur 10, Dhaka", "Old Dhaka (Nazimuddin Rd)"
@@ -213,7 +240,6 @@ public struct BangladeshParcelDeliveryView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -233,7 +259,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -249,7 +274,6 @@ public struct BangladeshParcelDeliveryView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(ServiceType.courier.accentTint)
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
         }
         .padding(.horizontal, KivorlySpacing.md)
@@ -299,6 +323,11 @@ public struct BangladeshParcelDeliveryView: View {
     // MARK: - Send Parcel Form
     private var sendParcelContent: some View {
         VStack(spacing: 16) {
+            // Top Promotional Carousel
+            ServiceTopCarouselView(
+                service: .courier,
+                slides: parcelPromoSlides
+            )
             // 1. Sender (Pickup) Card
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
@@ -373,7 +402,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // 2. Receiver (Drop-off) Card
             VStack(alignment: .leading, spacing: 12) {
@@ -443,7 +471,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // 3. Package Category & Weight Card
             VStack(alignment: .leading, spacing: 10) {
@@ -496,7 +523,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // 4. Delivery Speed Selection Card
             VStack(alignment: .leading, spacing: 10) {
@@ -550,7 +576,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // 5. Cash on Delivery (COD) Collection Card
             VStack(alignment: .leading, spacing: 10) {
@@ -594,7 +619,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // 6. Fare Breakdown & Confirm Booking
             VStack(spacing: 12) {
@@ -703,13 +727,11 @@ public struct BangladeshParcelDeliveryView: View {
                     .padding(.vertical, 14)
                     .background(ServiceType.courier.accentTint)
                     .clipShape(Capsule())
-                    .shadow(color: ServiceType.courier.accentTint.opacity(0.3), radius: 8, y: 3)
                 }
             }
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
         }
     }
 
@@ -797,7 +819,6 @@ public struct BangladeshParcelDeliveryView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
 
             // Past Parcels List
             VStack(alignment: .leading, spacing: 10) {

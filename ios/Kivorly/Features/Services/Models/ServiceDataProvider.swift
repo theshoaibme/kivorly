@@ -75,7 +75,8 @@ public enum ServiceDataProvider {
                     icon: "fork.knife",
                     serviceType: .foodDelivery,
                     badges: ["Heritage", "Best Seller"],
-                    imageEmoji: "🍛"
+                    imageEmoji: nil,
+                    imageAssetName: "food_kacchi_biryani"
                 ),
                 ServiceItemModel(
                     title: "Gourmet Angus Smash Burger",
@@ -88,7 +89,8 @@ public enum ServiceDataProvider {
                     icon: "takeoutbag.and.cup.and.straw.fill",
                     serviceType: .foodDelivery,
                     badges: ["Top Rated", "Juicy Beef"],
-                    imageEmoji: "🍔"
+                    imageEmoji: nil,
+                    imageAssetName: "food_smash_burger"
                 ),
                 ServiceItemModel(
                     title: "Artisan Woodfired Pizza",
@@ -101,7 +103,8 @@ public enum ServiceDataProvider {
                     icon: "fork.knife",
                     serviceType: .foodDelivery,
                     badges: ["Chef's Pick", "Crispy Crust"],
-                    imageEmoji: "🍕"
+                    imageEmoji: nil,
+                    imageAssetName: "food_woodfired_pizza"
                 ),
                 ServiceItemModel(
                     title: "Crispy Naga Wings Platter",
@@ -114,7 +117,8 @@ public enum ServiceDataProvider {
                     icon: "takeoutbag.and.cup.and.straw.fill",
                     serviceType: .foodDelivery,
                     badges: ["Hot & Spicy", "Popular"],
-                    imageEmoji: "🍗"
+                    imageEmoji: nil,
+                    imageAssetName: "food_naga_wings"
                 ),
                 ServiceItemModel(
                     title: "Tokyo Tonkotsu Ramen",
@@ -127,7 +131,8 @@ public enum ServiceDataProvider {
                     icon: "cup.and.saucer.fill",
                     serviceType: .foodDelivery,
                     badges: ["Authentic", "Rich Broth"],
-                    imageEmoji: "🍜"
+                    imageEmoji: nil,
+                    imageAssetName: "food_tonkotsu_ramen"
                 ),
                 ServiceItemModel(
                     title: "Fresh Superfood Salad Bowl",
@@ -140,7 +145,8 @@ public enum ServiceDataProvider {
                     icon: "leaf.fill",
                     serviceType: .foodDelivery,
                     badges: ["Gluten-Free", "Fresh"],
-                    imageEmoji: "🥗"
+                    imageEmoji: nil,
+                    imageAssetName: "food_salad_bowl"
                 ),
                 ServiceItemModel(
                     title: "Fresh Salmon Sushi Roll Set",
@@ -153,7 +159,8 @@ public enum ServiceDataProvider {
                     icon: "fork.knife",
                     serviceType: .foodDelivery,
                     badges: ["Premium", "Fresh Catch"],
-                    imageEmoji: "🍣"
+                    imageEmoji: nil,
+                    imageAssetName: "food_sushi_rolls"
                 ),
                 ServiceItemModel(
                     title: "Royal Mango Falooda & Kulfi",
@@ -166,7 +173,64 @@ public enum ServiceDataProvider {
                     icon: "cup.and.saucer.fill",
                     serviceType: .foodDelivery,
                     badges: ["Chilled", "Sweet Tooth"],
-                    imageEmoji: "🍨"
+                    imageEmoji: nil,
+                    imageAssetName: "food_falooda_dessert"
+                ),
+                ServiceItemModel(
+                    title: "Old Dhaka Mustard Beef Tehari",
+                    category: "Biryani • Traditional",
+                    priceText: "৳290",
+                    numericPrice: 290.0,
+                    rating: 4.90,
+                    reviewCount: 1850,
+                    etaOrDuration: "20-25 min",
+                    icon: "fork.knife",
+                    serviceType: .foodDelivery,
+                    badges: ["Authentic Mustard", "Tender Beef"],
+                    imageEmoji: nil,
+                    imageAssetName: "food_beef_tehari"
+                ),
+                ServiceItemModel(
+                    title: "Delhi Butter Chicken with Naan",
+                    category: "Traditional • Curry",
+                    priceText: "৳520",
+                    numericPrice: 520.0,
+                    rating: 4.89,
+                    reviewCount: 1420,
+                    etaOrDuration: "20-30 min",
+                    icon: "fork.knife",
+                    serviceType: .foodDelivery,
+                    badges: ["Creamy Rich", "Chef's Pick"],
+                    imageEmoji: nil,
+                    imageAssetName: "food_butter_chicken"
+                ),
+                ServiceItemModel(
+                    title: "Signature Cold Brew Iced Latte",
+                    category: "Beverage • Coffee",
+                    priceText: "৳280",
+                    numericPrice: 280.0,
+                    rating: 4.93,
+                    reviewCount: 940,
+                    etaOrDuration: "10-15 min",
+                    icon: "cup.and.saucer.fill",
+                    serviceType: .foodDelivery,
+                    badges: ["Specialty Roast", "Chilled"],
+                    imageEmoji: nil,
+                    imageAssetName: "food_iced_coffee"
+                ),
+                ServiceItemModel(
+                    title: "Molten Belgian Lava Cake",
+                    category: "Dessert • Sweets",
+                    priceText: "৳340",
+                    numericPrice: 340.0,
+                    rating: 4.94,
+                    reviewCount: 880,
+                    etaOrDuration: "15-20 min",
+                    icon: "cup.and.saucer.fill",
+                    serviceType: .foodDelivery,
+                    badges: ["Warm Chocolate", "Indulgent"],
+                    imageEmoji: nil,
+                    imageAssetName: "food_chocolate_cake"
                 )
             ]
 
@@ -242,40 +306,88 @@ public enum ServiceDataProvider {
         case .grocery:
             return [
                 ServiceItemModel(
-                    title: "Fresh Farm Eggs & Dairy",
+                    title: "Padma River Deshi Ilish Fish",
+                    category: "Fresh Fish",
+                    priceText: "\u{09F3}1650",
+                    numericPrice: 1650.0,
+                    rating: 4.98,
+                    reviewCount: 3120,
+                    etaOrDuration: "30 min",
+                    icon: "fish.fill",
+                    serviceType: .grocery,
+                    badges: ["River Fresh", "Daily Catch"],
+                    imageAssetName: "grocery_ilish_fish",
+                    imageUrl: "https://images.unsplash.com/photo-1534482421-64566f976cfa?w=600&auto=format&fit=crop&q=80"
+                ),
+                ServiceItemModel(
+                    title: "Farm Fresh Brown Layer Eggs",
                     category: "Daily Essentials",
-                    priceText: "৳280",
-                    numericPrice: 280.0,
-                    rating: 4.9,
+                    priceText: "\u{09F3}165",
+                    numericPrice: 165.0,
+                    rating: 4.92,
                     reviewCount: 2200,
                     etaOrDuration: "15 min",
                     icon: "basket.fill",
                     serviceType: .grocery,
-                    badges: ["Fresh", "Locally Sourced"]
+                    badges: ["Organic", "Farm Direct"],
+                    imageAssetName: "grocery_brown_eggs",
+                    imageUrl: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=600&auto=format&fit=crop&q=80"
                 ),
                 ServiceItemModel(
-                    title: "Crisp Organic Fruit Basket",
-                    category: "Produce",
-                    priceText: "৳550",
-                    numericPrice: 550.0,
-                    rating: 4.86,
-                    reviewCount: 940,
-                    etaOrDuration: "15 min",
-                    icon: "carrot.fill",
-                    serviceType: .grocery,
-                    badges: ["100% Organic"]
-                ),
-                ServiceItemModel(
-                    title: "Whole Grain Sourdough Loaf",
-                    category: "Bakery",
-                    priceText: "৳220",
-                    numericPrice: 220.0,
-                    rating: 4.95,
-                    reviewCount: 610,
+                    title: "Fresh Deshi Chicken (Dressed)",
+                    category: "Meat & Poultry",
+                    priceText: "\u{09F3}380",
+                    numericPrice: 380.0,
+                    rating: 4.88,
+                    reviewCount: 1540,
                     etaOrDuration: "20 min",
-                    icon: "birthday.cake.fill",
+                    icon: "flame.fill",
                     serviceType: .grocery,
-                    badges: ["Baked Today"]
+                    badges: ["Antibiotic Free"],
+                    imageAssetName: "grocery_chicken_meat",
+                    imageUrl: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&auto=format&fit=crop&q=80"
+                ),
+                ServiceItemModel(
+                    title: "Halal Beef Curry Cut",
+                    category: "Meat & Poultry",
+                    priceText: "\u{09F3}780",
+                    numericPrice: 780.0,
+                    rating: 4.95,
+                    reviewCount: 1820,
+                    etaOrDuration: "25 min",
+                    icon: "fork.knife",
+                    serviceType: .grocery,
+                    badges: ["Bengal Meat", "Halal"],
+                    imageAssetName: "grocery_beef_cut",
+                    imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=600&auto=format&fit=crop&q=80"
+                ),
+                ServiceItemModel(
+                    title: "Premium Miniket Rice (5kg)",
+                    category: "Rice & Oil",
+                    priceText: "\u{09F3}410",
+                    numericPrice: 410.0,
+                    rating: 4.91,
+                    reviewCount: 940,
+                    etaOrDuration: "20 min",
+                    icon: "takeoutbag.and.cup.and.straw.fill",
+                    serviceType: .grocery,
+                    badges: ["100% Sorted"],
+                    imageAssetName: "grocery_miniket_rice",
+                    imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80"
+                ),
+                ServiceItemModel(
+                    title: "Farm Fresh Ripe Tomatoes (1kg)",
+                    category: "Fresh Vegetables",
+                    priceText: "\u{09F3}60",
+                    numericPrice: 60.0,
+                    rating: 4.85,
+                    reviewCount: 810,
+                    etaOrDuration: "15 min",
+                    icon: "leaf.fill",
+                    serviceType: .grocery,
+                    badges: ["Vine Ripe"],
+                    imageAssetName: "grocery_ripe_tomatoes",
+                    imageUrl: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80"
                 )
             ]
 

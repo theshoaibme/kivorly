@@ -20,6 +20,8 @@ public struct ServiceItemModel: Identifiable, Hashable {
     public let serviceType: ServiceType
     public let badges: [String]
     public let imageEmoji: String?
+    public let imageAssetName: String?
+    public let imageUrl: String?
 
     public init(
         title: String,
@@ -32,7 +34,9 @@ public struct ServiceItemModel: Identifiable, Hashable {
         icon: String,
         serviceType: ServiceType,
         badges: [String] = [],
-        imageEmoji: String? = nil
+        imageEmoji: String? = nil,
+        imageAssetName: String? = nil,
+        imageUrl: String? = nil
     ) {
         self.title = title
         self.category = category
@@ -45,5 +49,7 @@ public struct ServiceItemModel: Identifiable, Hashable {
         self.serviceType = serviceType
         self.badges = badges
         self.imageEmoji = imageEmoji
+        self.imageAssetName = imageAssetName
+        self.imageUrl = imageUrl
     }
 }

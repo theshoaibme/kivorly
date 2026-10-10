@@ -88,8 +88,11 @@ public struct ServiceDetailView: View {
                     // Context Bar (Location, ETA, Guarantee)
                     serviceContextBar
 
-                    // Dedicated Service Feature Banner
-                    dedicatedServiceBanner
+                    // Top Promotional Carousel
+                    ServiceTopCarouselView(
+                        service: service,
+                        slides: servicePromoSlides
+                    )
 
                     // Promotional Coupon Strip
                     promotionalCouponStrip
@@ -134,7 +137,6 @@ public struct ServiceDetailView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -154,7 +156,6 @@ public struct ServiceDetailView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -175,7 +176,6 @@ public struct ServiceDetailView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(isSearchActive ? Color.white : Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
         }
         .padding(.horizontal, KivorlySpacing.md)
@@ -207,6 +207,92 @@ public struct ServiceDetailView: View {
         .padding(.horizontal, KivorlySpacing.md)
         .padding(.vertical, 8)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
+    }
+
+    private var servicePromoSlides: [ServicePromoSlide] {
+        switch service {
+        case .foodDelivery:
+            return [
+                ServicePromoSlide(
+                    id: "food-1",
+                    tag: "HOT & FRESH",
+                    title: "Old Dhaka Kacchi & Biryani",
+                    subtitle: "Slow-cooked saffron basmati rice with tender mutton & alu bokhara.",
+                    actionTitle: "Order Now",
+                    imageAssetName: "hero_food_kacchi"
+                ),
+                ServicePromoSlide(
+                    id: "food-2",
+                    tag: "30-MIN DISPATCH",
+                    title: "Chef Crafted Meals",
+                    subtitle: "Fast doorstep delivery with insulated thermal heat-lock bags.",
+                    actionTitle: "Explore Menus",
+                    imageAssetName: "hero_food_chef"
+                ),
+                ServicePromoSlide(
+                    id: "food-3",
+                    tag: "FLAT 25% OFF",
+                    title: "Midnight Gourmet Cravings",
+                    subtitle: "Fresh artisan burgers, loaded fries and thick milkshakes.",
+                    actionTitle: "View Deals",
+                    imageAssetName: "hero_food_burger"
+                )
+            ]
+        case .homeServices:
+            return [
+                ServicePromoSlide(
+                    id: "home-1",
+                    tag: "CERTIFIED PROS",
+                    title: "AC Master Jet Servicing",
+                    subtitle: "High-pressure chemical wash, gas recharge and cooling guarantee.",
+                    actionTitle: "Book Service",
+                    imageAssetName: "hero_home_ac"
+                ),
+                ServicePromoSlide(
+                    id: "home-2",
+                    tag: "90-DAY WARRANTY",
+                    title: "Plumbing & Electrical Repair",
+                    subtitle: "Verified background-checked technicians with transparent fixed rates.",
+                    actionTitle: "Request Pro",
+                    imageAssetName: "hero_home_repair"
+                ),
+                ServicePromoSlide(
+                    id: "home-3",
+                    tag: "SAME DAY SLOTS",
+                    title: "Deep Sanitization & Cleaning",
+                    subtitle: "Hospital-grade vacuuming, sofa shampooing and germ shield.",
+                    actionTitle: "Schedule Now",
+                    imageAssetName: "hero_home_cleaning"
+                )
+            ]
+        default:
+            return [
+                ServicePromoSlide(
+                    id: "gen-1",
+                    tag: "VERIFIED",
+                    title: "\(service.title) Express Booking",
+                    subtitle: serviceDescription,
+                    actionTitle: "Book Now",
+                    imageAssetName: "hero_ride_banner"
+                ),
+                ServicePromoSlide(
+                    id: "gen-2",
+                    tag: "GUARANTEED",
+                    title: "100% Quality & Trust",
+                    subtitle: "Transparent upfront pricing with zero hidden surcharges.",
+                    actionTitle: "Explore",
+                    imageAssetName: "hero_parcel_nationwide"
+                ),
+                ServicePromoSlide(
+                    id: "gen-3",
+                    tag: "CONVENIENT",
+                    title: "Fast Doorstep Scheduling",
+                    subtitle: "Track live updates and schedule at your preferred convenience.",
+                    actionTitle: "Get Started",
+                    imageAssetName: "hero_home_services_banner"
+                )
+            ]
+        }
     }
 
     // MARK: - Dedicated Service Hero Banner

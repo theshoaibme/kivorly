@@ -91,7 +91,6 @@ public struct UberRideBookingSheet: View {
                 .clipShape(CustomCornerShape(radius: 28, corners: [.topLeft, .topRight]))
                 .ignoresSafeArea(edges: .bottom)
         )
-        .shadow(color: Color.black.opacity(0.12), radius: 14, y: -4)
         .sheet(isPresented: $showPaymentMethodPicker) {
             compactPaymentPickerSheet
         }
@@ -311,7 +310,6 @@ public struct UberRideBookingSheet: View {
                     .frame(height: 50)
                     .background(KivorlyColors.primary)
                     .clipShape(Capsule())
-                    .shadow(color: KivorlyColors.primary.opacity(0.25), radius: 6, y: 3)
                 }
                 .buttonStyle(PlainButtonStyle())
             }

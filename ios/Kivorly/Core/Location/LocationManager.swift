@@ -15,7 +15,7 @@ public final class LocationManager: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
 
     public var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    public var userLocation: CLLocationCoordinate2D? = nil
+    public var userLocation: CLLocationCoordinate2D? = LocationManager.defaultCoordinate
     public var isLocating: Bool = false
 
     // Default fallback coordinate (Gulshan 2, Dhaka)
@@ -61,6 +61,9 @@ public final class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        // Silently preserve last location or fallback
+        // Fall back cleanly to default Dhaka coordinate to prevent MapKit / provider failures
+        if userLocation == nil {
+            userLocation = LocationManager.defaultCoordinate
+        }
     }
 }

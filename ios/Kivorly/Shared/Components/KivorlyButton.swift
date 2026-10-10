@@ -2,17 +2,19 @@
 //  KivorlyButton.swift
 //  Kivorly
 //
-//  Native iOS default system styled button using standard continuous corner radius (12pt),
-//  native system colors, and default system selection borders.
+//  Default iPhone system styled button with variant support (filled/prominent, tinted/secondary,
+//  bordered/outline, plain, destructive). Uses solid colors (no gradients), flat styling (no shadows),
+//  and custom service tinting.
 //
 
 import SwiftUI
 
 public enum KivorlyButtonStyle {
-    case primary
-    case secondary
-    case outline
-    case destructive
+    case primary      // iOS Filled / Prominent
+    case secondary    // iOS Tinted / Soft Fill
+    case outline      // iOS Bordered / Outlined
+    case plain        // iOS Borderless / Plain
+    case destructive  // iOS Destructive
 }
 
 public enum KivorlyButtonSize {
@@ -58,6 +60,7 @@ public struct KivorlyButton: View {
     private let icon: String?
     private let style: KivorlyButtonStyle
     private let size: KivorlyButtonSize
+    private let tint: Color?
     private let isLoading: Bool
     private let isFullWidth: Bool
     private let isSelected: Bool
@@ -68,6 +71,7 @@ public struct KivorlyButton: View {
         icon: String? = nil,
         style: KivorlyButtonStyle = .primary,
         size: KivorlyButtonSize = .regular,
+        tint: Color? = nil,
         isLoading: Bool = false,
         isFullWidth: Bool = true,
         isSelected: Bool = false,
@@ -77,6 +81,7 @@ public struct KivorlyButton: View {
         self.icon = icon
         self.style = style
         self.size = size
+        self.tint = tint
         self.isLoading = isLoading
         self.isFullWidth = isFullWidth
         self.isSelected = isSelected
@@ -113,23 +118,32 @@ public struct KivorlyButton: View {
             .overlay(
                 Capsule()
                     .strokeBorder(
-                        isSelected ? Color(uiColor: .tintColor) : borderColor,
-                        lineWidth: isSelected ? 2 : (style == .outline ? 1 : 0)
+                        isSelected ? effectiveTint : borderColor,
+                        lineWidth: isSelected ? 2 : (style == .outline ? 1.2 : 0)
                     )
             )
         }
+        .buttonStyle(PlainButtonStyle())
         .disabled(isLoading)
         .accessibilityLabel(title)
+    }
+
+    private var effectiveTint: Color {
+        tint ?? KivorlyColors.primary
     }
 
     @ViewBuilder
     private var backgroundView: some View {
         switch style {
         case .primary:
-            KivorlyColors.primary
+            effectiveTint
         case .secondary:
-            Color(uiColor: .secondarySystemFill)
-        case .outline:
+            if let customTint = tint {
+                customTint.opacity(0.12)
+            } else {
+                Color(uiColor: .secondarySystemFill)
+            }
+        case .outline, .plain:
             Color.clear
         case .destructive:
             KivorlyColors.error
@@ -141,9 +155,11 @@ public struct KivorlyButton: View {
         case .primary:
             return Color.white
         case .secondary:
-            return KivorlyColors.textPrimary
+            return tint ?? KivorlyColors.textPrimary
         case .outline:
-            return KivorlyColors.primary
+            return effectiveTint
+        case .plain:
+            return effectiveTint
         case .destructive:
             return Color.white
         }
@@ -152,7 +168,7 @@ public struct KivorlyButton: View {
     private var borderColor: Color {
         switch style {
         case .outline:
-            return Color(uiColor: .tintColor)
+            return effectiveTint
         default:
             return Color.clear
         }

@@ -2,7 +2,8 @@
 //  HomeHeroCarouselView.swift
 //  Kivorly
 //
-//  Infinite looped hero carousel featuring real high-resolution images, real service illustrations, and continuous auto-scroll.
+//  Infinite looped hero carousel featuring ACTUAL high-resolution stock photography
+//  (no icon images), flat styling (no shadows, no gradients), and continuous auto-scroll.
 //
 
 import SwiftUI
@@ -14,8 +15,7 @@ public struct HeroBannerItem: Identifiable {
     public let title: String
     public let actionTitle: String
     public let service: ServiceType
-    public let backgroundImage: String?
-    public let assetGraphic: String
+    public let backgroundImage: String
     public let tintColor: Color
 }
 
@@ -32,7 +32,6 @@ public struct HomeHeroCarouselView: View {
             actionTitle: "Book Ride",
             service: .rideSharing,
             backgroundImage: "hero_ride_banner",
-            assetGraphic: "service_ride_sharing",
             tintColor: Color(red: 0x25 / 255.0, green: 0x63 / 255.0, blue: 0xEB / 255.0)
         ),
         HeroBannerItem(
@@ -40,8 +39,7 @@ public struct HomeHeroCarouselView: View {
             title: "Hot Meals Delivered to Doorstep",
             actionTitle: "Order Food",
             service: .foodDelivery,
-            backgroundImage: nil,
-            assetGraphic: "service_food_delivery",
+            backgroundImage: "hero_food_banner",
             tintColor: Color(red: 0xF9 / 255.0, green: 0x73 / 255.0, blue: 0x16 / 255.0)
         ),
         HeroBannerItem(
@@ -49,26 +47,47 @@ public struct HomeHeroCarouselView: View {
             title: "Fresh Groceries & Dairy in 15m",
             actionTitle: "Shop Fresh",
             service: .grocery,
-            backgroundImage: nil,
-            assetGraphic: "service_grocery",
+            backgroundImage: "hero_grocery_banner",
             tintColor: Color(red: 0x10 / 255.0, green: 0xB9 / 255.0, blue: 0x81 / 255.0)
+        ),
+        HeroBannerItem(
+            tag: "Festival Mall",
+            title: "Official Brand Stores Mega Offers",
+            actionTitle: "Shop Now",
+            service: .shopping,
+            backgroundImage: "hero_shopping_banner",
+            tintColor: Color(red: 0x8B / 255.0, green: 0x5C / 255.0, blue: 0xF6 / 255.0)
         ),
         HeroBannerItem(
             tag: "Top Stays",
             title: "Verified Hotels & Weekend Resorts",
             actionTitle: "Explore",
             service: .hotels,
-            backgroundImage: nil,
-            assetGraphic: "service_hotels",
+            backgroundImage: "hero_hotels_banner",
             tintColor: Color(red: 0x63 / 255.0, green: 0x66 / 255.0, blue: 0xF1 / 255.0)
+        ),
+        HeroBannerItem(
+            tag: "Express Travel",
+            title: "Intercity AC Coach & Train Tickets",
+            actionTitle: "Book Tickets",
+            service: .tickets,
+            backgroundImage: "hero_tickets_banner",
+            tintColor: Color(red: 0xF4 / 255.0, green: 0x3F / 255.0, blue: 0x5E / 255.0)
+        ),
+        HeroBannerItem(
+            tag: "Nationwide Express",
+            title: "30-Min Doorstep Parcel Pickup",
+            actionTitle: "Send Parcel",
+            service: .courier,
+            backgroundImage: "hero_courier_banner",
+            tintColor: Color(red: 0xF5 / 255.0, green: 0x9E / 255.0, blue: 0x0B / 255.0)
         ),
         HeroBannerItem(
             tag: "Home Master",
             title: "AC Servicing & Deep Cleaning",
             actionTitle: "Book Service",
             service: .homeServices,
-            backgroundImage: nil,
-            assetGraphic: "service_home_services",
+            backgroundImage: "hero_home_services_banner",
             tintColor: Color(red: 0x06 / 255.0, green: 0xB6 / 255.0, blue: 0xD4 / 255.0)
         )
     ]
@@ -93,7 +112,7 @@ public struct HomeHeroCarouselView: View {
                         .tag(index)
                 }
             }
-            .frame(height: 146)
+            .frame(height: 154)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .onReceive(timer) { _ in
                 withAnimation(.easeInOut(duration: 0.55)) {
@@ -119,78 +138,51 @@ public struct HomeHeroCarouselView: View {
             onSelectBanner(item)
         }) {
             ZStack(alignment: .leading) {
-                // Background: Real Photo with Gradient or Solid Tint
-                if let bg = item.backgroundImage {
-                    Image(bg)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity, maxHeight: 146)
-                        .overlay(
-                            LinearGradient(
-                                colors: [
-                                    Color.black.opacity(0.78),
-                                    Color.black.opacity(0.40),
-                                    Color.clear
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .clipped()
-                } else {
-                    RoundedRectangle(cornerRadius: KivorlyRadius.medium)
-                        .fill(item.tintColor)
-                }
+                // Background: Actual Real Stock Photography with Solid Contrast Overlay (No Gradient)
+                Image(item.backgroundImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: 154)
+                    .overlay(
+                        Color.black.opacity(0.46)
+                    )
+                    .clipped()
 
-                // Foreground Content
-                HStack(spacing: KivorlySpacing.md) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(item.tag)
-                            .font(.system(size: 9, weight: .bold))
-                            .padding(.horizontal, 9)
-                            .padding(.vertical, 3)
-                            .background(Color.white.opacity(0.25))
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-
-                        Text(item.title)
-                            .font(KivorlyTypography.titleMedium)
-                            .foregroundColor(.white)
-                            .lineLimit(2)
-
-                        HStack(spacing: 4) {
-                            Text(item.actionTitle)
-                                .font(KivorlyTypography.captionBold)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 10, weight: .bold))
-                        }
-                        .foregroundColor(item.backgroundImage != nil ? KivorlyColors.primary : item.tintColor)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white)
+                // Foreground Content (Actual images only, No icon images)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.tag)
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(item.tintColor)
+                        .foregroundColor(.white)
                         .clipShape(Capsule())
+
+                    Text(item.title)
+                        .font(KivorlyTypography.titleMedium)
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+
+                    Spacer(minLength: 4)
+
+                    // Default iPhone Action Button (No shadow, no gradient)
+                    HStack(spacing: 5) {
+                        Text(item.actionTitle)
+                            .font(.system(size: 12, weight: .bold))
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 10, weight: .bold))
                     }
-
-                    Spacer()
-
-                    // Real 3D Rendered Service Graphic
-                    ZStack {
-                        Circle()
-                            .fill(item.service.softBackgroundColor.opacity(0.92))
-                            .frame(width: 72, height: 72)
-
-                        Image(item.assetGraphic)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 54, height: 54)
-                    }
-                    .shadow(color: Color.black.opacity(0.15), radius: 6)
-                    .padding(.trailing, KivorlySpacing.sm)
+                    .foregroundColor(Color.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.white)
+                    .clipShape(Capsule())
                 }
-                .padding(.horizontal, KivorlySpacing.md)
-                .padding(.vertical, KivorlySpacing.sm)
+                .padding(16)
             }
-            .cornerRadius(KivorlyRadius.medium)
+            .frame(maxWidth: .infinity, maxHeight: 154)
+            .cornerRadius(18)
             .padding(.horizontal, KivorlySpacing.md)
         }
         .buttonStyle(PlainButtonStyle())

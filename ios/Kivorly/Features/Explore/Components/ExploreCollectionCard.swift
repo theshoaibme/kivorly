@@ -83,15 +83,24 @@ public struct ExploreCollectionCard: View {
 
     private func miniPreviewTile(_ item: ServiceItemModel) -> some View {
         HStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(Color(uiColor: .tertiarySystemFill))
+            if let asset = item.imageAssetName, !asset.isEmpty, let uiImage = UIImage(named: asset) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: 32, height: 32)
+                    .clipped()
+                    .clipShape(Circle())
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(Color(uiColor: .tertiarySystemFill))
+                        .frame(width: 32, height: 32)
 
-                Image(systemName: item.icon)
-                    .font(.system(size: 13, weight: .bold))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundColor(service.accentTint)
+                    Image(systemName: item.icon)
+                        .font(.system(size: 13, weight: .bold))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundColor(service.accentTint)
+                }
             }
 
             VStack(alignment: .leading, spacing: 2) {

@@ -77,6 +77,33 @@ public struct BangladeshHotelsBookingView: View {
     @State private var showConfirmationVoucher: Bool = false
     @State private var confirmedBookingId: String = ""
 
+    private let hotelPromoSlides: [ServicePromoSlide] = [
+        ServicePromoSlide(
+            id: "hot-slide-1",
+            tag: "BEACHFRONT RESORT",
+            title: "Cox's Bazar Ocean Suites",
+            subtitle: "Direct sea-facing luxury balconies with complimentary buffet breakfast.",
+            actionTitle: "View Resorts",
+            imageAssetName: "hero_hotels_coxsbazar"
+        ),
+        ServicePromoSlide(
+            id: "hot-slide-2",
+            tag: "WEEKEND GETAWAY",
+            title: "Sylhet Tea Garden Eco-Resorts",
+            subtitle: "Peaceful rainforest suites surrounded by lush green hills in Sreemangal.",
+            actionTitle: "Book Stay",
+            imageAssetName: "hero_hotels_sylhet"
+        ),
+        ServicePromoSlide(
+            id: "hot-slide-3",
+            tag: "LUXURY SUITES",
+            title: "Dhaka 5-Star City Stays",
+            subtitle: "Premium executive club rooms with heated infinity pool and spa access.",
+            actionTitle: "Explore Deals",
+            imageAssetName: "hero_hotels_dhaka"
+        )
+    ]
+
     private let destinations = [
         "All", "Cox's Bazar", "Sajek Valley", "Sreemangal", "Sylhet", "Saint Martin", "Dhaka 5-Star"
     ]
@@ -255,8 +282,11 @@ public struct BangladeshHotelsBookingView: View {
                     // Context Bar
                     stayContextBar
 
-                    // Hero Package Highlight Banner
-                    heroPackageBanner
+                    // Top Promotional Carousel
+                    ServiceTopCarouselView(
+                        service: .hotels,
+                        slides: hotelPromoSlides
+                    )
 
                     // Destination Tabs Filter
                     destinationsFilterBar
@@ -293,7 +323,6 @@ public struct BangladeshHotelsBookingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -312,7 +341,6 @@ public struct BangladeshHotelsBookingView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -330,7 +358,6 @@ public struct BangladeshHotelsBookingView: View {
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(isSearchActive ? .white : Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
         }
         .padding(.horizontal, KivorlySpacing.md)
@@ -387,7 +414,6 @@ public struct BangladeshHotelsBookingView: View {
         .padding(.vertical, 10)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
     }
 
     // MARK: - Hero Package Highlight Banner
@@ -423,15 +449,8 @@ public struct BangladeshHotelsBookingView: View {
                 .font(.system(size: 42))
         }
         .padding(14)
-        .background(
-            LinearGradient(
-                colors: [Color(red: 0x0D / 255.0, green: 0x94 / 255.0, blue: 0x88 / 255.0), Color(red: 0x05 / 255.0, green: 0x96 / 255.0, blue: 0x69 / 255.0)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(ServiceType.hotels.accentTint)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: Color.teal.opacity(0.25), radius: 8, y: 3)
     }
 
     // MARK: - Destinations Filter Bar
@@ -655,7 +674,6 @@ public struct BangladeshHotelsBookingView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -857,7 +875,6 @@ public struct BangladeshHotelsBookingView: View {
                             .padding(.vertical, 14)
                             .background(ServiceType.hotels.accentTint)
                             .clipShape(Capsule())
-                            .shadow(color: ServiceType.hotels.accentTint.opacity(0.3), radius: 6, y: 2)
                         }
                         .padding(.top, 4)
                     }

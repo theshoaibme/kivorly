@@ -21,6 +21,134 @@ public struct GroceryItem: Identifiable {
     public let origin: String
     public let freshnessBadge: String
     public let inStock: Bool
+    public let imageAssetName: String
+    public let imageUrl: String
+    public let itemDescription: String
+    public let storageGuide: String
+
+    public init(
+        id: String,
+        name: String,
+        category: String,
+        unit: String,
+        price: Double,
+        originalPrice: Double?,
+        emoji: String,
+        origin: String,
+        freshnessBadge: String,
+        inStock: Bool,
+        imageAssetName: String = "",
+        imageUrl: String = "",
+        itemDescription: String = "",
+        storageGuide: String = "Store in a cool dry place or refrigerate immediately upon arrival."
+    ) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.unit = unit
+        self.price = price
+        self.originalPrice = originalPrice
+        self.emoji = emoji
+        self.origin = origin
+        self.freshnessBadge = freshnessBadge
+        self.inStock = inStock
+        self.imageAssetName = imageAssetName
+        self.imageUrl = imageUrl
+        self.itemDescription = itemDescription
+        self.storageGuide = storageGuide
+    }
+}
+
+// MARK: - Reusable Real High Quality Grocery Stock Image
+public struct GroceryItemImageView: View {
+    public let assetName: String
+    public let imageUrl: String
+    public let emojiFallback: String
+    public var size: CGFloat?
+    public var height: CGFloat?
+    public var cornerRadius: CGFloat
+    public var contentMode: ContentMode
+
+    public init(
+        assetName: String,
+        imageUrl: String = "",
+        emojiFallback: String,
+        size: CGFloat? = 58,
+        height: CGFloat? = nil,
+        cornerRadius: CGFloat = 12,
+        contentMode: ContentMode = .fill
+    ) {
+        self.assetName = assetName
+        self.imageUrl = imageUrl
+        self.emojiFallback = emojiFallback
+        self.size = size
+        self.height = height
+        self.cornerRadius = cornerRadius
+        self.contentMode = contentMode
+    }
+
+    public var body: some View {
+        ZStack {
+            Color(uiColor: .secondarySystemFill)
+
+            if !assetName.isEmpty, let uiImage = UIImage(named: assetName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else if !imageUrl.isEmpty, let url = URL(string: imageUrl) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            Color(uiColor: .tertiarySystemFill)
+                            ProgressView()
+                                .scaleEffect(0.6)
+                        }
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: contentMode)
+                    case .failure:
+                        fallbackView
+                    @unknown default:
+                        fallbackView
+                    }
+                }
+            } else {
+                fallbackView
+            }
+        }
+        .modifier(GroceryImageFrameModifier(size: size, height: height))
+        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
+    private var fallbackView: some View {
+        ZStack {
+            Color(uiColor: .tertiarySystemFill)
+            Text(emojiFallback)
+                .font(.system(size: (height ?? size ?? 58) * 0.35))
+        }
+    }
+}
+
+fileprivate struct GroceryImageFrameModifier: ViewModifier {
+    let size: CGFloat?
+    let height: CGFloat?
+
+    func body(content: Content) -> some View {
+        if let h = height {
+            content
+                .frame(maxWidth: .infinity)
+                .frame(height: h)
+        } else if let s = size {
+            content
+                .frame(width: s, height: s)
+        } else {
+            content
+                .frame(width: 58, height: 58)
+        }
+    }
 }
 
 public struct GroceryCartEntry: Identifiable {
@@ -41,9 +169,10 @@ public struct BangladeshGroceryView: View {
     @State private var deliverySlot: String = "⚡ Express (45 - 60 mins)"
     @State private var showSlotSheet: Bool = false
 
-    // Cart Management
+    // Cart & Detail Management
     @State private var cart: [String: Int] = [:] // itemId: quantity
     @State private var showBasketSheet: Bool = false
+    @State private var selectedItemForDetail: GroceryItem? = nil
 
     // Checkout Flow
     @State private var selectedPaymentMethod: String = "bKash"
@@ -73,7 +202,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🐟",
             origin: "Chandpur Ghat",
             freshnessBadge: "River Fresh",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_ilish_fish",
+            imageUrl: "https://images.unsplash.com/photo-1534482421-64566f976cfa?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Authentic wild Padma River silver Hilsha sourced directly from Chandpur Ghat. Prized for its rich oily marbling, tender texture, and signature aroma. Perfect for traditional Shorshe Ilish, Ilish Bhaja, and Panta Ilish.",
+            storageGuide: "Keep refrigerated between 0°C to 4°C and cook within 24 hours, or freeze immediately."
         ),
         GroceryItem(
             id: "gr-2",
@@ -85,7 +218,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🍗",
             origin: "Local Farm",
             freshnessBadge: "Antibiotic Free",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_chicken_meat",
+            imageUrl: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Naturally raised village poultry from local farms. Cleaned, dressed, and skin-off cut into standard curry pieces. Completely antibiotic-free with tender, organic flavor.",
+            storageGuide: "Store chilled below 4°C and cook within 48 hours."
         ),
         GroceryItem(
             id: "gr-3",
@@ -97,7 +234,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🍚",
             origin: "Dinajpur Mills",
             freshnessBadge: "100% Sorted",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_miniket_rice",
+            imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Aged Miniket rice from the paddy fields of Dinajpur. Double-polished, extra-thin grain that cooks fluffy, non-sticky, and aromatic.",
+            storageGuide: "Store in an airtight container in a dry, ventilated pantry."
         ),
         GroceryItem(
             id: "gr-4",
@@ -109,7 +250,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🛢️",
             origin: "BEOL Bangladesh",
             freshnessBadge: "Vitamin A",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_soybean_oil",
+            imageUrl: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Triple-refined pure soybean oil enriched with essential Vitamin A by BEOL Bangladesh. Light, odorless, and perfect for high-temperature frying and daily curries.",
+            storageGuide: "Keep away from direct sunlight; seal lid tightly after use."
         ),
         GroceryItem(
             id: "gr-5",
@@ -121,7 +266,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🧴",
             origin: "Square Consumer",
             freshnessBadge: "Kachi Ghani",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_mustard_oil",
+            imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Cold-pressed Kachi Ghani mustard oil prepared from select mustard seeds. Brings the classic pungent kick, aroma, and rich golden color to traditional bhortas and pickles.",
+            storageGuide: "Store in a cool, dark place away from heat."
         ),
         GroceryItem(
             id: "gr-6",
@@ -133,31 +282,43 @@ public struct BangladeshGroceryView: View {
             emoji: "🥚",
             origin: "Gazipur Poultry",
             freshnessBadge: "Daily Fresh",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_brown_eggs",
+            imageUrl: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Clean, graded brown layer eggs collected daily from bio-secure farms in Gazipur. Rich golden yolks with high protein and essential vitamins.",
+            storageGuide: "Keep refrigerated pointy end down for maximum freshness."
         ),
         GroceryItem(
             id: "gr-7",
             name: "Fresh Red Potatoes (Deshi Alu)",
-            category: "🥦 Fresh Vegetables",
+            category: "🥬 Fresh Vegetables",
             unit: "1 kg Pack",
             price: 55,
             originalPrice: 65,
             emoji: "🥔",
             origin: "Bogra Farms",
             freshnessBadge: "Farm Harvest",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_red_potatoes",
+            imageUrl: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Famous Bogra red soil potatoes. Firm texture and naturally sweet earthiness that absorbs rich spices during curries, alu bhaji, and bhortaa.",
+            storageGuide: "Store in a cool, dark, well-ventilated basket; do not refrigerate."
         ),
         GroceryItem(
             id: "gr-8",
             name: "Fresh Green Chillies & Coriander Leaves",
-            category: "🥦 Fresh Vegetables",
+            category: "🥬 Fresh Vegetables",
             unit: "250g Combo",
             price: 40,
             originalPrice: 50,
             emoji: "🌶️",
             origin: "Manikganj Bazaar",
             freshnessBadge: "Morning Picked",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_green_chillies",
+            imageUrl: "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Spicy vibrant green chillies paired with fragrant fresh cilantro coriander leaves. Freshly harvested at dawn from Manikganj.",
+            storageGuide: "Wrap stems in dry paper towel and refrigerate in crisper drawer."
         ),
         GroceryItem(
             id: "gr-9",
@@ -169,7 +330,11 @@ public struct BangladeshGroceryView: View {
             emoji: "🥛",
             origin: "BRAC Dairy",
             freshnessBadge: "Chilled",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_fresh_milk",
+            imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "100% pure cow milk pasteurized and chilled under stringent food safety standards by BRAC Dairy. Rich source of calcium and protein.",
+            storageGuide: "Keep refrigerated at 4°C at all times; boil before drinking once pouch is opened."
         ),
         GroceryItem(
             id: "gr-10",
@@ -181,7 +346,59 @@ public struct BangladeshGroceryView: View {
             emoji: "🥩",
             origin: "Bengal Meat",
             freshnessBadge: "Daily Butchered",
-            inStock: true
+            inStock: true,
+            imageAssetName: "grocery_beef_cut",
+            imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Premium halal young bull beef prepared by Bengal Meat. Expertly butchered into bone-in curry cubes for rich gravy bhuna, rezala, and tehari.",
+            storageGuide: "Keep chilled or freeze at -18°C for long-term storage."
+        ),
+        GroceryItem(
+            id: "gr-11",
+            name: "Fresh Red Onions (Deshi Peyaj)",
+            category: "🥬 Fresh Vegetables",
+            unit: "1 kg Pack",
+            price: 75,
+            originalPrice: 85,
+            emoji: "🧅",
+            origin: "Faridpur Farms",
+            freshnessBadge: "New Harvest",
+            inStock: true,
+            imageAssetName: "grocery_red_onions",
+            imageUrl: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Locally grown pungent red shallot onions from Faridpur. Crisp texture with sharp savory flavor essential for curries, biryani beresta, and salads.",
+            storageGuide: "Store in a breathable wire basket in a dry shaded corner."
+        ),
+        GroceryItem(
+            id: "gr-12",
+            name: "Farm Fresh Ripe Tomatoes",
+            category: "🥬 Fresh Vegetables",
+            unit: "1 kg Pack",
+            price: 60,
+            originalPrice: 70,
+            emoji: "🍅",
+            origin: "Narsingdi Harvest",
+            freshnessBadge: "Vine Ripe",
+            inStock: true,
+            imageAssetName: "grocery_ripe_tomatoes",
+            imageUrl: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Plump, naturally vine-ripened red tomatoes from Narsingdi growers. Balanced sweet and tangy acidity for salads, sauces, and slow-simmered fish gravies.",
+            storageGuide: "Store at room temperature until fully ripe, then refrigerate."
+        ),
+        GroceryItem(
+            id: "gr-13",
+            name: "Radhuni Pure Spices Combo Pack",
+            category: "🌶️ Spices & Salt",
+            unit: "400g (Turmeric + Chili)",
+            price: 260,
+            originalPrice: 290,
+            emoji: "🧂",
+            origin: "Square Consumer",
+            freshnessBadge: "100% Pure",
+            inStock: true,
+            imageAssetName: "grocery_spices_combo",
+            imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&auto=format&fit=crop&q=80",
+            itemDescription: "Authentic 400g combo pack containing pure turmeric and chili powders. Milled from sun-dried whole spices without artificial colors or preservatives.",
+            storageGuide: "Store in an airtight jar away from steam and humidity."
         )
     ]
 
@@ -211,6 +428,33 @@ public struct BangladeshGroceryView: View {
 
     private let freeDeliveryThreshold: Double = 800.0
 
+    private let groceryPromoSlides: [ServicePromoSlide] = [
+        ServicePromoSlide(
+            id: "gr-slide-1",
+            tag: "RIVER FRESH",
+            title: "Padma River Deshi Ilish",
+            subtitle: "Wild Hilsha caught fresh daily from Chandpur Ghat with authentic aroma.",
+            actionTitle: "Shop Fresh",
+            imageAssetName: "hero_grocery_ilish"
+        ),
+        ServicePromoSlide(
+            id: "gr-slide-2",
+            tag: "FREE DELIVERY",
+            title: "Zero Express Delivery Fee",
+            subtitle: "Add ৳800 or more in fresh groceries and unlock free 1-hour doorstep delivery.",
+            actionTitle: "Fill Basket",
+            imageAssetName: "hero_grocery_basket"
+        ),
+        ServicePromoSlide(
+            id: "gr-slide-3",
+            tag: "100% TESTED",
+            title: "Formalin-Free Farm Harvest",
+            subtitle: "Strictly tested daily vegetables and milk from Bogra and Manikganj growers.",
+            actionTitle: "Explore",
+            imageAssetName: "hero_grocery_organic"
+        )
+    ]
+
     public var body: some View {
         VStack(spacing: 0) {
             // Top Navigation Bar
@@ -224,20 +468,32 @@ public struct BangladeshGroceryView: View {
 
             ScrollView {
                 VStack(spacing: 14) {
-                    // Express 1-Hour Slot & Location Context
-                    deliveryContextBar
+                    // Top Promotional Carousel
+                    ServiceTopCarouselView(
+                        service: .grocery,
+                        slides: groceryPromoSlides
+                    )
+                    // Express 1-Hour Slot & Location Context (Shows when items are picked/added)
+                    if basketItemCount > 0 {
+                        deliveryContextBar
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
 
-                    // Free Delivery Progress Banner
-                    freeDeliveryProgressBar
+                    // Free Delivery Progress Banner (Shows when items are picked/added)
+                    if basketItemCount > 0 {
+                        freeDeliveryProgressBar
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
 
                     // Bazaar Categories Bar
                     categoryFilterBar
 
-                    // Grocery Items Grid / Rows
-                    groceryItemsList
+                    // 2 by 2 Grocery Items Grid
+                    groceryItemsGrid
                 }
                 .padding(.horizontal, KivorlySpacing.md)
                 .padding(.vertical, KivorlySpacing.md)
+                .animation(.easeInOut(duration: 0.25), value: basketItemCount > 0)
             }
 
             // Floating Live Basket Bar (if items in cart)
@@ -257,6 +513,9 @@ public struct BangladeshGroceryView: View {
         .sheet(isPresented: $showOrderConfirmed) {
             orderSuccessModal
         }
+        .sheet(item: $selectedItemForDetail) { item in
+            groceryItemDetailSheet(for: item)
+        }
     }
 
     // MARK: - Top Navigation Bar
@@ -271,7 +530,6 @@ public struct BangladeshGroceryView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -290,7 +548,6 @@ public struct BangladeshGroceryView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -309,7 +566,6 @@ public struct BangladeshGroceryView: View {
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(isSearchActive ? .white : Color(uiColor: .label))
                         )
-                        .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
                 }
 
                 Button(action: { showBasketSheet = true }) {
@@ -322,7 +578,6 @@ public struct BangladeshGroceryView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(ServiceType.grocery.accentTint)
                             )
-                            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
                         if basketItemCount > 0 {
                             Text("\(basketItemCount)")
@@ -403,7 +658,6 @@ public struct BangladeshGroceryView: View {
             .padding(12)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -442,7 +696,6 @@ public struct BangladeshGroceryView: View {
         .padding(12)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
     }
 
     // MARK: - Category Filter Bar
@@ -482,96 +735,396 @@ public struct BangladeshGroceryView: View {
         }
     }
 
-    // MARK: - Grocery Items List
-    private var groceryItemsList: some View {
-        VStack(spacing: 10) {
+    // MARK: - 2 by 2 Grocery Items Grid
+    private let gridColumns: [GridItem] = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    private var groceryItemsGrid: some View {
+        LazyVGrid(columns: gridColumns, spacing: 12) {
             ForEach(filteredItems) { item in
-                groceryItemRow(for: item)
+                groceryItemCard(for: item)
             }
         }
     }
 
-    private func groceryItemRow(for item: GroceryItem) -> some View {
+    private func groceryItemCard(for item: GroceryItem) -> some View {
         let count = cart[item.id] ?? 0
 
-        return HStack(spacing: 12) {
-            // Freshness Container
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(ServiceType.grocery.accentTint.opacity(0.1))
-                    .frame(width: 54, height: 54)
+        return Button(action: {
+            selectedItemForDetail = item
+        }) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Top Image Container with badges
+                ZStack(alignment: .topLeading) {
+                    GroceryItemImageView(
+                        assetName: item.imageAssetName,
+                        imageUrl: item.imageUrl,
+                        emojiFallback: item.emoji,
+                        height: 125,
+                        cornerRadius: 14,
+                        contentMode: .fill
+                    )
 
-                Text(item.emoji)
-                    .font(.system(size: 32))
-            }
-
-            // Info
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.name)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(Color(uiColor: .label))
-                    .lineLimit(1)
-
-                HStack(spacing: 6) {
-                    Text(item.unit)
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(uiColor: .secondaryLabel))
-
-                    Text("•")
-                        .foregroundColor(Color(uiColor: .tertiaryLabel))
-
-                    Text(item.origin)
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(ServiceType.grocery.accentTint)
-                }
-
-                // Freshness Badge
-                Text(item.freshnessBadge)
-                    .font(.system(size: 9, weight: .black))
-                    .foregroundColor(.green)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.12))
-                    .clipShape(Capsule())
-            }
-
-            Spacer()
-
-            // Price & Stepper
-            VStack(alignment: .trailing, spacing: 6) {
-                HStack(alignment: .bottom, spacing: 4) {
-                    Text("৳\(Int(item.price))")
-                        .font(.system(size: 15, weight: .black))
-                        .foregroundColor(ServiceType.grocery.accentTint)
-
-                    if let orig = item.originalPrice {
-                        Text("৳\(Int(orig))")
-                            .font(.system(size: 10))
-                            .strikethrough()
-                            .foregroundColor(Color(uiColor: .tertiaryLabel))
-                    }
-                }
-
-                // In-line Stepper
-                if count == 0 {
-                    Button(action: {
-                        cart[item.id] = 1
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 10, weight: .bold))
-                            Text("Add")
-                                .font(.system(size: 11, weight: .black))
-                        }
+                    // Freshness Badge (Top Leading)
+                    Text(item.freshnessBadge)
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
-                        .background(ServiceType.grocery.accentTint)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.green)
                         .clipShape(Capsule())
+                        .padding(6)
+
+                    // Discount Badge (Top Trailing)
+                    if let orig = item.originalPrice, orig > item.price {
+                        let savings = Int(((orig - item.price) / orig) * 100)
+                        HStack {
+                            Spacer()
+                            Text("\(savings)% OFF")
+                                .font(.system(size: 9, weight: .black))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Color.red)
+                                .clipShape(Capsule())
+                                .padding(6)
+                        }
                     }
-                    .buttonStyle(PlainButtonStyle())
-                } else {
+                }
+
+                // Info Area
+                VStack(alignment: .leading, spacing: 4) {
+                    // Origin & Unit
+                    HStack(spacing: 4) {
+                        Text(item.origin)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(ServiceType.grocery.accentTint)
+                            .lineLimit(1)
+                        Text("•")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(uiColor: .tertiaryLabel))
+                        Text(item.unit)
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(uiColor: .secondaryLabel))
+                            .lineLimit(1)
+                    }
+                    .padding(.top, 8)
+
+                    // Item Name (Fixed 2 lines height)
+                    Text(item.name)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(uiColor: .label))
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(height: 32, alignment: .topLeading)
+
+                    Spacer(minLength: 4)
+
+                    // Price & Stepper Row
+                    HStack(alignment: .bottom, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("৳\(Int(item.price))")
+                                .font(.system(size: 15, weight: .black))
+                                .foregroundColor(ServiceType.grocery.accentTint)
+
+                            if let orig = item.originalPrice {
+                                Text("৳\(Int(orig))")
+                                    .font(.system(size: 10))
+                                    .strikethrough()
+                                    .foregroundColor(Color(uiColor: .tertiaryLabel))
+                            }
+                        }
+
+                        Spacer()
+
+                        // Add / Quantity Stepper Button
+                        if count == 0 {
+                            Button(action: {
+                                cart[item.id] = 1
+                            }) {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 9, weight: .bold))
+                                    Text("Add")
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(ServiceType.grocery.accentTint)
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        } else {
+                            HStack(spacing: 6) {
+                                Button(action: {
+                                    if count > 1 {
+                                        cart[item.id] = count - 1
+                                    } else {
+                                        cart.removeValue(forKey: item.id)
+                                    }
+                                }) {
+                                    Image(systemName: "minus")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(ServiceType.grocery.accentTint)
+                                        .frame(width: 20, height: 20)
+                                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                        .clipShape(Circle())
+                                }
+
+                                Text("\(count)")
+                                    .font(.system(size: 11, weight: .black))
+                                    .foregroundColor(Color(uiColor: .label))
+                                    .frame(minWidth: 12)
+
+                                Button(action: {
+                                    cart[item.id] = count + 1
+                                }) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 20, height: 20)
+                                        .background(ServiceType.grocery.accentTint)
+                                        .clipShape(Circle())
+                                }
+                            }
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 3)
+                            .background(Color(uiColor: .tertiarySystemFill))
+                            .clipShape(Capsule())
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
+            }
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color(uiColor: .separator).opacity(0.2), lineWidth: 0.8)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    // MARK: - Grocery Item Detail Sheet
+    private func groceryItemDetailSheet(for item: GroceryItem) -> some View {
+        let count = cart[item.id] ?? 0
+        let itemSavings: Double? = item.originalPrice.map { $0 - item.price }
+
+        return NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Big Stock Image Container
+                    ZStack(alignment: .topTrailing) {
+                        GroceryItemImageView(
+                            assetName: item.imageAssetName,
+                            imageUrl: item.imageUrl,
+                            emojiFallback: item.emoji,
+                            height: 240,
+                            cornerRadius: 20,
+                            contentMode: .fill
+                        )
+
+                        // Freshness Badge
+                        HStack {
+                            Text(item.freshnessBadge)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color.green)
+                                .clipShape(Capsule())
+
+                            Spacer()
+
+                            if let orig = item.originalPrice, orig > item.price {
+                                let savings = Int(((orig - item.price) / orig) * 100)
+                                Text("\(savings)% OFF")
+                                    .font(.system(size: 11, weight: .black))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.red)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .padding(14)
+                    }
+
+                    // Title & Origin Header
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Text(item.category)
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(ServiceType.grocery.accentTint)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(ServiceType.grocery.accentTint.opacity(0.12))
+                                .clipShape(Capsule())
+
+                            Spacer()
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(ServiceType.grocery.accentTint)
+                                Text(item.origin)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Color(uiColor: .secondaryLabel))
+                            }
+                        }
+
+                        Text(item.name)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(Color(uiColor: .label))
+
+                        Text("Pack Size: \(item.unit)")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(uiColor: .secondaryLabel))
+                    }
+
+                    // Price Section
+                    HStack(alignment: .bottom, spacing: 10) {
+                        Text("৳\(Int(item.price))")
+                            .font(.system(size: 28, weight: .black))
+                            .foregroundColor(ServiceType.grocery.accentTint)
+
+                        if let orig = item.originalPrice {
+                            Text("৳\(Int(orig))")
+                                .font(.system(size: 16, weight: .medium))
+                                .strikethrough()
+                                .foregroundColor(Color(uiColor: .tertiaryLabel))
+
+                            if let savings = itemSavings, savings > 0 {
+                                Text("Save ৳\(Int(savings))")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.green)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Color.green.opacity(0.12))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+
+                    // Delivery Time & Slot Notice (Shows when picking this item)
                     HStack(spacing: 8) {
+                        Image(systemName: "clock.badge.checkmark.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(ServiceType.grocery.accentTint)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Delivery Time: \(deliverySlot)")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Color(uiColor: .label))
+
+                            Text("Express doorstep dispatch to Gulshan 2, Dhaka")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color(uiColor: .secondaryLabel))
+                        }
+
+                        Spacer()
+
+                        Button(action: { showSlotSheet = true }) {
+                            Text("Change")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(ServiceType.grocery.accentTint)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(ServiceType.grocery.accentTint.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+
+                    Divider()
+
+                    // Quality Guarantees
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Kivorly Fresh Guarantee")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(Color(uiColor: .label))
+
+                        VStack(spacing: 8) {
+                            guaranteeRow(
+                                icon: "bolt.shield.fill",
+                                title: "1-Hour Express Dhaka Delivery",
+                                subtitle: "Packed in temperature-controlled bags direct from nearest micro-hub"
+                            )
+                            guaranteeRow(
+                                icon: "leaf.circle.fill",
+                                title: "100% Formalin-Free & Tested",
+                                subtitle: "Quality checked on arrival every morning at 4:30 AM"
+                            )
+                            guaranteeRow(
+                                icon: "arrow.triangle.2.circlepath.circle.fill",
+                                title: "Instant Doorstep Return",
+                                subtitle: "Inspect on delivery; return immediately if not completely satisfied"
+                            )
+                        }
+                        .padding(12)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                    }
+
+                    // Description
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Product Details")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(Color(uiColor: .label))
+
+                        Text(item.itemDescription.isEmpty ? "\(item.name) is sourced daily from \(item.origin) to guarantee maximum freshness, premium taste, and nutritional value for authentic Bangladeshi home cooking." : item.itemDescription)
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(uiColor: .secondaryLabel))
+                            .lineSpacing(3)
+                    }
+
+                    // Storage Guide
+                    HStack(spacing: 10) {
+                        Image(systemName: "thermometer.snowflake")
+                            .font(.system(size: 18))
+                            .foregroundColor(ServiceType.grocery.accentTint)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Storage Instructions")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Color(uiColor: .label))
+                            Text(item.storageGuide)
+                                .font(.system(size: 11))
+                                .foregroundColor(Color(uiColor: .secondaryLabel))
+                        }
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+                }
+                .padding(16)
+            }
+            .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+            .navigationTitle("Item Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        selectedItemForDetail = nil
+                    }
+                    .font(.system(size: 14, weight: .bold))
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                // Bottom Basket Bar in Sheet
+                HStack(spacing: 12) {
+                    // Stepper
+                    HStack(spacing: 12) {
                         Button(action: {
                             if count > 1 {
                                 cart[item.id] = count - 1
@@ -580,39 +1133,77 @@ public struct BangladeshGroceryView: View {
                             }
                         }) {
                             Image(systemName: "minus")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(ServiceType.grocery.accentTint)
-                                .frame(width: 24, height: 24)
-                                .background(ServiceType.grocery.accentTint.opacity(0.15))
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(count > 0 ? Color(uiColor: .label) : Color(uiColor: .tertiaryLabel))
+                                .frame(width: 32, height: 32)
+                                .background(Color(uiColor: .tertiarySystemFill))
                                 .clipShape(Circle())
                         }
+                        .disabled(count == 0)
 
-                        Text("\(count)")
-                            .font(.system(size: 13, weight: .bold))
-                            .frame(minWidth: 16)
+                        Text("\(max(1, count))")
+                            .font(.system(size: 16, weight: .bold))
+                            .frame(minWidth: 24)
 
                         Button(action: {
-                            cart[item.id] = count + 1
+                            cart[item.id] = (count == 0 ? 1 : count + 1)
                         }) {
                             Image(systemName: "plus")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 24, height: 24)
-                                .background(ServiceType.grocery.accentTint)
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(Color(uiColor: .label))
+                                .frame(width: 32, height: 32)
+                                .background(Color(uiColor: .tertiarySystemFill))
                                 .clipShape(Circle())
                         }
                     }
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 2)
-                    .background(Color(uiColor: .tertiarySystemFill))
+                    .padding(6)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
                     .clipShape(Capsule())
+
+                    // Action Button (Standard default iPhone button size: 48pt height)
+                    Button(action: {
+                        if count == 0 {
+                            cart[item.id] = 1
+                        }
+                        selectedItemForDetail = nil
+                    }) {
+                        HStack {
+                            Text(count == 0 ? "Add to Basket" : "Update Basket")
+                                .font(.system(size: 15, weight: .bold))
+                            Spacer()
+                            Text("৳\(Int(item.price * Double(max(1, count))))")
+                                .font(.system(size: 15, weight: .black))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .frame(height: 48)
+                        .background(ServiceType.grocery.accentTint)
+                        .clipShape(Capsule())
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color(uiColor: .systemBackground))
             }
         }
-        .padding(12)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: Color.black.opacity(0.03), radius: 4, y: 1)
+    }
+
+    private func guaranteeRow(icon: String, title: String, subtitle: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(ServiceType.grocery.accentTint)
+                .frame(width: 22)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Color(uiColor: .label))
+                Text(subtitle)
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(uiColor: .secondaryLabel))
+            }
+        }
     }
 
     // MARK: - Floating Basket Bar
@@ -650,7 +1241,6 @@ public struct BangladeshGroceryView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .padding(.horizontal, KivorlySpacing.md)
         .padding(.bottom, 8)
-        .shadow(color: ServiceType.grocery.accentTint.opacity(0.35), radius: 10, y: 4)
     }
 
     // MARK: - Delivery Slot Selector Modal
@@ -734,11 +1324,14 @@ public struct BangladeshGroceryView: View {
                                 ForEach(cart.sorted(by: { $0.key < $1.key }), id: \.key) { key, qty in
                                     if let item = groceryCatalog.first(where: { $0.id == key }) {
                                         HStack(spacing: 12) {
-                                            Text(item.emoji)
-                                                .font(.system(size: 26))
-                                                .frame(width: 42, height: 42)
-                                                .background(ServiceType.grocery.accentTint.opacity(0.1))
-                                                .cornerRadius(10)
+                                            GroceryItemImageView(
+                                                assetName: item.imageAssetName,
+                                                imageUrl: item.imageUrl,
+                                                emojiFallback: item.emoji,
+                                                size: 44,
+                                                cornerRadius: 8,
+                                                contentMode: .fill
+                                            )
 
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(item.name)
@@ -887,7 +1480,6 @@ public struct BangladeshGroceryView: View {
                         .padding(.vertical, 14)
                         .background(ServiceType.grocery.accentTint)
                         .clipShape(Capsule())
-                        .shadow(color: ServiceType.grocery.accentTint.opacity(0.3), radius: 6, y: 2)
                     }
                     .padding(16)
                     .background(Color(uiColor: .secondarySystemGroupedBackground))

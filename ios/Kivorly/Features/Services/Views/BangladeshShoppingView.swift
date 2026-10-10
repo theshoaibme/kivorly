@@ -155,6 +155,33 @@ public struct BangladeshShoppingView: View {
         "All", "Ethnic & Panjabi", "Casual Wear", "Women's Fashion", "Footwear", "Smartphones & Tech", "Electronics & Home", "Home Living", "Beauty & Care"
     ]
 
+    private let shoppingPromoSlides: [ServicePromoSlide] = [
+        ServicePromoSlide(
+            id: "shop-slide-1",
+            tag: "FESTIVAL SALE",
+            title: "Official Brand Stores Mega Offer",
+            subtitle: "Up to 40% OFF on Aarong, Apex & Yellow fashion collections.",
+            actionTitle: "Shop Apparel",
+            imageAssetName: "hero_shopping_fashion"
+        ),
+        ServicePromoSlide(
+            id: "shop-slide-2",
+            tag: "OFFICIAL WARRANTY",
+            title: "Original Gadgets & Tech",
+            subtitle: "100% genuine Apple, Sony & Anker accessories with warranty.",
+            actionTitle: "Explore Tech",
+            imageAssetName: "hero_shopping_gadgets"
+        ),
+        ServicePromoSlide(
+            id: "shop-slide-3",
+            tag: "64 DISTRICTS",
+            title: "Nationwide Cash on Delivery",
+            subtitle: "Doorstep delivery across all 64 districts with open parcel inspection.",
+            actionTitle: "Order Now",
+            imageAssetName: "hero_shopping_delivery"
+        )
+    ]
+
     private let brands = [
         "All", "Aarong", "Yellow", "Apex", "Bata", "Xiaomi BD", "Walton", "Apple", "Samsung", "Artisan", "Taaga", "Lafz"
     ]
@@ -639,8 +666,11 @@ public struct BangladeshShoppingView: View {
                     // Delivery Address Context Chip
                     addressContextBar
 
-                    // Mega Festival Sale Banner
-                    festivalSaleBanner
+                    // Top Promotional Carousel
+                    ServiceTopCarouselView(
+                        service: .shopping,
+                        slides: shoppingPromoSlides
+                    )
 
                     // Brand Stores Filter Bar
                     brandStoresFilterBar
@@ -692,7 +722,6 @@ public struct BangladeshShoppingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -711,7 +740,6 @@ public struct BangladeshShoppingView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -731,7 +759,6 @@ public struct BangladeshShoppingView: View {
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(isSearchActive ? .white : Color(uiColor: .label))
                         )
-                        .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
                 }
 
                 // Cart Icon with Badge
@@ -745,7 +772,6 @@ public struct BangladeshShoppingView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(ServiceType.shopping.accentTint)
                             )
-                            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
                         if cartItemCount > 0 {
                             Text("\(cartItemCount)")
@@ -812,7 +838,6 @@ public struct BangladeshShoppingView: View {
         .padding(.vertical, 10)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
     }
 
     // MARK: - Festival Sale Banner
@@ -971,7 +996,6 @@ public struct BangladeshShoppingView: View {
                 .background(showWishlistOnly ? Color.red : Color(uiColor: .secondarySystemGroupedBackground))
                 .foregroundColor(showWishlistOnly ? .white : Color(uiColor: .label))
                 .clipShape(Capsule())
-                .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
             }
             .buttonStyle(PlainButtonStyle())
 
@@ -1007,7 +1031,6 @@ public struct BangladeshShoppingView: View {
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .foregroundColor(ServiceType.shopping.accentTint)
                 .clipShape(Capsule())
-                .shadow(color: Color.black.opacity(0.04), radius: 4, y: 1)
             }
         }
         .padding(.vertical, 2)
@@ -1148,7 +1171,6 @@ public struct BangladeshShoppingView: View {
             .padding(10)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -70,7 +70,6 @@ public struct UberRideBookingView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(Color(uiColor: .label))
                             )
-                            .shadow(color: Color.black.opacity(0.15), radius: 6, y: 2)
                     }
                     .padding(.trailing, KivorlySpacing.md)
                 }
@@ -109,7 +108,6 @@ public struct UberRideBookingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.12), radius: 6)
             }
 
             Spacer()
@@ -129,7 +127,6 @@ public struct UberRideBookingView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.1), radius: 4)
 
             Spacer()
 
@@ -145,7 +142,6 @@ public struct UberRideBookingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.12), radius: 6)
             }
         }
         .padding(.horizontal, KivorlySpacing.md)
@@ -192,7 +188,6 @@ public struct UberRideBookingView: View {
             .padding(12)
             .background(Color(uiColor: .systemBackground))
             .cornerRadius(KivorlyRadius.medium)
-            .shadow(color: Color.black.opacity(0.12), radius: 8)
             .padding(.horizontal, KivorlySpacing.md)
             }
         .buttonStyle(PlainButtonStyle())

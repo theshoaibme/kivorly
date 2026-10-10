@@ -4,6 +4,7 @@
 //
 //  Uber-style interactive MapKit map with authentic pickup & drop-off pins,
 //  clean dark polyline, realistic nearby vehicle markers, and GPS tracking.
+//  Flat design with NO shadows and NO gradients.
 //
 
 import SwiftUI
@@ -16,14 +17,7 @@ public struct UberStyleRideMapView: View {
     let nearbyCarCoordinates: [CLLocationCoordinate2D]
     let driverCoord: CLLocationCoordinate2D?
 
-    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .camera(
-        MapCamera(
-            centerCoordinate: LocationManager.defaultCoordinate,
-            distance: 3500,
-            heading: 0,
-            pitch: 30
-        )
-    ))
+    @State private var cameraPosition: MapCameraPosition
 
     public init(
         locationManager: LocationManager,
@@ -37,6 +31,14 @@ public struct UberStyleRideMapView: View {
         self.destinationCoord = destinationCoord
         self.nearbyCarCoordinates = nearbyCarCoordinates
         self.driverCoord = driverCoord
+        _cameraPosition = State(initialValue: .camera(
+            MapCamera(
+                centerCoordinate: pickupCoord,
+                distance: 3500,
+                heading: 0,
+                pitch: 0
+            )
+        ))
     }
 
     public var body: some View {
@@ -52,7 +54,6 @@ public struct UberStyleRideMapView: View {
                             .padding(.vertical, 3)
                             .background(Color.black)
                             .clipShape(Capsule())
-                            .shadow(color: Color.black.opacity(0.25), radius: 3)
 
                         ZStack {
                             Circle()
@@ -81,7 +82,10 @@ public struct UberStyleRideMapView: View {
                                 .padding(.vertical, 3)
                                 .background(Color.white)
                                 .clipShape(Capsule())
-                                .shadow(color: Color.black.opacity(0.25), radius: 3)
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.black.opacity(0.2), lineWidth: 0.8)
+                                )
 
                             ZStack {
                                 RoundedRectangle(cornerRadius: 4, style: .continuous)
@@ -114,7 +118,10 @@ public struct UberStyleRideMapView: View {
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 28, height: 28)
-                                .shadow(color: Color.black.opacity(0.22), radius: 3, y: 1)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color(uiColor: .separator).opacity(0.3), lineWidth: 0.8)
+                                )
 
                             Image(systemName: "car.side.fill")
                                 .font(.system(size: 13, weight: .bold))
@@ -158,27 +165,32 @@ public struct UberStyleRideMapView: View {
 
                         Text("Enable GPS for exact pickup")
                             .font(KivorlyTypography.captionBold)
-                            .foregroundColor(Color(uiColor: .label))
+                            .foregroundColor(KivorlyColors.textPrimary)
 
                         Spacer()
 
-                        Button("Allow") {
+                        Button(action: {
                             locationManager.requestPermission()
+                        }) {
+                            Text("Enable")
+                                .font(KivorlyTypography.captionBold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(KivorlyColors.primary)
+                                .clipShape(Capsule())
                         }
-                        .font(KivorlyTypography.captionBold)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
-                        .background(KivorlyColors.primary)
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
                     }
                     .padding(.horizontal, KivorlySpacing.md)
-                    .padding(.vertical, 10)
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .cornerRadius(KivorlyRadius.medium)
-                    .shadow(color: Color.black.opacity(0.1), radius: 6)
+                    .padding(.vertical, KivorlySpacing.sm)
+                    .background(KivorlyColors.surface)
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Color(uiColor: .separator).opacity(0.2), lineWidth: 0.8)
+                    )
                     .padding(.horizontal, KivorlySpacing.md)
-                    .padding(.top, 110)
+                    .padding(.top, 50)
 
                     Spacer()
                 }

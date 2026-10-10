@@ -128,6 +128,33 @@ public struct BangladeshTicketsBookingView: View {
         ])
     ]
 
+    private let ticketsPromoSlides: [ServicePromoSlide] = [
+        ServicePromoSlide(
+            id: "tkt-slide-1",
+            tag: "AC SLEEPER COACH",
+            title: "Green Line & Shohagh Scania",
+            subtitle: "Live seat reservation for Dhaka - Chittagong - Cox's Bazar highways.",
+            actionTitle: "Book Seats",
+            imageAssetName: "hero_tickets_scania"
+        ),
+        ServicePromoSlide(
+            id: "tkt-slide-2",
+            tag: "RAILWAY E-TICKET",
+            title: "Intercity Trains Guaranteed",
+            subtitle: "Instant confirmed berths on Suborno, Sonar Bangla & Parabat Express.",
+            actionTitle: "Check Trains",
+            imageAssetName: "hero_tickets_train"
+        ),
+        ServicePromoSlide(
+            id: "tkt-slide-3",
+            tag: "VIP LAUNCH CABIN",
+            title: "Dhaka to Barishal River Cruises",
+            subtitle: "Luxury duplex AC cabins on MV Sundarban 10 and MV Manami.",
+            actionTitle: "Reserve Cabin",
+            imageAssetName: "hero_tickets_launch"
+        )
+    ]
+
     private let sampleTickets: [TransportTicketItem] = [
         // 1. Domestic Planes / Flights across Bangladesh
         TransportTicketItem(
@@ -521,6 +548,12 @@ public struct BangladeshTicketsBookingView: View {
 
             ScrollView {
                 VStack(spacing: 14) {
+                    // Top Promotional Carousel
+                    ServiceTopCarouselView(
+                        service: .tickets,
+                        slides: ticketsPromoSlides
+                    )
+
                     // Nationwide Route & Any-Date Selector Card
                     nationwideRouteCard
 
@@ -562,7 +595,6 @@ public struct BangladeshTicketsBookingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
 
             Spacer()
@@ -581,7 +613,6 @@ public struct BangladeshTicketsBookingView: View {
             .padding(.vertical, 8)
             .background(Color(uiColor: .systemBackground))
             .clipShape(Capsule())
-            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
 
             Spacer()
 
@@ -601,7 +632,6 @@ public struct BangladeshTicketsBookingView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(isSearchActive ? Color.white : Color(uiColor: .label))
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 6, y: 2)
             }
         }
         .padding(.horizontal, KivorlySpacing.md)
@@ -689,7 +719,6 @@ public struct BangladeshTicketsBookingView: View {
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
                         )
-                        .shadow(color: ServiceType.tickets.accentTint.opacity(0.3), radius: 6, y: 2)
                 }
 
                 // TO Block
@@ -775,7 +804,6 @@ public struct BangladeshTicketsBookingView: View {
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
     }
 
     // MARK: - Calendar Picker Sheet
@@ -1116,7 +1144,6 @@ public struct BangladeshTicketsBookingView: View {
             .padding(14)
             .background(Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -1480,7 +1507,6 @@ public struct BangladeshTicketsBookingView: View {
                 .padding(16)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .shadow(color: Color.black.opacity(0.08), radius: 10, y: 3)
 
                 Spacer()
 

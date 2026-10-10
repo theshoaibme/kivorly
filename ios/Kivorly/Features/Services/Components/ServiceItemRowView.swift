@@ -20,22 +20,8 @@ public struct ServiceItemRowView: View {
         Button(action: onSelect) {
             KivorlyCard(padding: KivorlySpacing.md) {
                 HStack(spacing: KivorlySpacing.md) {
-                    // Food Image or Service Icon on Muted Rounded Container
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(item.serviceType.accentTint.opacity(0.12))
-                            .frame(width: 54, height: 54)
-
-                        if let emoji = item.imageEmoji, !emoji.isEmpty {
-                            Text(emoji)
-                                .font(.system(size: 30))
-                        } else {
-                            Image(systemName: item.icon)
-                                .font(.system(size: 22, weight: .bold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundColor(item.serviceType.accentTint)
-                        }
-                    }
+                    // Real Stock Image or Service Icon on Muted Rounded Container
+                    itemImageContainer
 
                     // Item Info
                     VStack(alignment: .leading, spacing: 4) {
@@ -68,22 +54,20 @@ public struct ServiceItemRowView: View {
 
                             Text(item.etaOrDuration)
                                 .font(KivorlyTypography.caption)
-                                .foregroundColor(item.serviceType.accentTint)
+                                .foregroundColor(KivorlyColors.textSecondary)
                         }
 
-                        // Badges
+                        // Badges Row
                         if !item.badges.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 4) {
-                                    ForEach(item.badges, id: \.self) { badge in
-                                        Text(badge)
-                                            .font(.system(size: 9, weight: .bold))
-                                            .padding(.horizontal, 7)
-                                            .padding(.vertical, 2.5)
-                                            .background(Color(uiColor: .tertiarySystemFill))
-                                            .foregroundColor(KivorlyColors.textSecondary)
-                                            .clipShape(Capsule())
-                                    }
+                            HStack(spacing: 4) {
+                                ForEach(item.badges, id: \.self) { badge in
+                                    Text(badge)
+                                        .font(.system(size: 9, weight: .bold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(item.serviceType.accentTint.opacity(0.1))
+                                        .foregroundColor(item.serviceType.accentTint)
+                                        .cornerRadius(4)
                                 }
                             }
                             .padding(.top, 2)
@@ -92,8 +76,8 @@ public struct ServiceItemRowView: View {
 
                     Spacer()
 
-                    // Price & Action Indicator
-                    VStack(alignment: .trailing, spacing: 6) {
+                    // Price & Chevron
+                    VStack(alignment: .trailing, spacing: 4) {
                         Text(item.priceText)
                             .font(KivorlyTypography.priceDisplay)
                             .foregroundColor(item.serviceType.accentTint)
@@ -106,5 +90,69 @@ public struct ServiceItemRowView: View {
             }
         }
         .buttonStyle(PlainButtonStyle())
+    }
+
+    @ViewBuilder
+    private var itemImageContainer: some View {
+        let imgSize: CGFloat = item.serviceType == .foodDelivery ? 64 : 54
+        if let asset = item.imageAssetName, !asset.isEmpty, let uiImage = UIImage(named: asset) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: imgSize, height: imgSize)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color(uiColor: .separator).opacity(0.2), lineWidth: 0.8)
+                )
+        } else if let imgUrl = item.imageUrl, !imgUrl.isEmpty, let url = URL(string: imgUrl) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: imgSize, height: imgSize)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                default:
+                    fallbackIconContainer
+                }
+            }
+        } else {
+            fallbackIconContainer
+        }
+    }
+
+    @ViewBuilder
+    private var fallbackIconContainer: some View {
+        let imgSize: CGFloat = item.serviceType == .foodDelivery ? 64 : 54
+        Group {
+            if item.serviceType == .foodDelivery {
+                Image("hero_food_kacchi")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: imgSize, height: imgSize)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(item.serviceType.accentTint.opacity(0.12))
+                        .frame(width: imgSize, height: imgSize)
+
+                    if let emoji = item.imageEmoji, !emoji.isEmpty {
+                        Text(emoji)
+                            .font(.system(size: 30))
+                    } else {
+                        Image(systemName: item.icon)
+                            .font(.system(size: 22, weight: .bold))
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundColor(item.serviceType.accentTint)
+                    }
+                }
+            }
+        }
     }
 }
