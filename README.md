@@ -31,9 +31,9 @@
 
 <br>
 
-<details>
+<details align="center">
 <summary align="center">
-  <img src="https://img.shields.io/badge/📸%20View%20More%20Screenshots-Click%20to%20Expand-007AFF?style=for-the-badge" alt="View More Service Screenshots"/>
+  <kbd><b>&nbsp; 📸 &nbsp; View More Service Screenshots &nbsp;&bull;&nbsp; Click to Expand &nbsp;</b></kbd>
 </summary>
 <br>
 
